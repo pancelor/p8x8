@@ -5,7 +5,15 @@ poke(0x5f57, 0x40) -- secondary font
 
 p8env.print=print --COMPAT: p8scii is not supported. other differences?
 p8env.pal=pal --COMPAT: not quite the same. might need some checks for pal({},1) etc
-p8env.palt=palt --COMPAT: is this the same still?
+function p8env.palt(...)
+	if select("#",...)==0 then
+		-- no args = reset
+		palt(0)
+		palt(0,true)
+	else
+		palt(...) -- COMPAT: surely the alt pal stuff is different now
+	end
+end
 function p8env.tline(x0,y0,x1,y1,mx,my, mdx,mdy)
 	compat("TODO: tline support")
 	--[[

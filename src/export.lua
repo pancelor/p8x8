@@ -27,7 +27,8 @@ function export_p64(path)
 	mkdir(path.."/map")
 	mkdir(path.."/p8code")
 	mkdir(path.."/sfx") -- probably not necessary? but startup.lua makes it by default
-	
+	store(path.."/window_title.txt",path:basename())
+
 	export_baked(path)
 
 	export_gfx(path.."/gfx/0.gfx")

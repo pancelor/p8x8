@@ -1,7 +1,8 @@
 --[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-22 14:26:42",revision=1403]]
 printh"---"
-dev = true
+-- dev = true
 dev_include_lib = dev
+-- dev_export_filename = dev and "/desktop/temp.p64"
 
 
 local function include_lib(name)
@@ -19,10 +20,6 @@ include "src/gui.lua"
 include "src/import.lua"
 include "src/warn.lua"
 include "src/export.lua"
-
-
-dev = true
-dev_export_filename = dev and "/desktop/temp.p64"
 
 
 function _init()
@@ -139,13 +136,17 @@ function action_export_p64()
 	if dev_export_filename then
 		export_p64(dev_export_filename)
 	else
-		-- TODO: default to export_path (string)
+		export_p64(export_path)
+		--[[
+		-- TODO: open filepicker with default file of export_path
+		-- I'm not sure how to set the default name (is it possible?)
 		real_intention="export_p64"
 		create_process("/system/apps/filenav.p64", {
 			path="/desktop",
 			intention="save_file_as",
 			window_attribs={workspace="current", autoclose=true},
 		})
+		--]]
 	end
 end
 

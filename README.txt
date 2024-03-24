@@ -31,6 +31,7 @@ The goal of this tool is to let you run carts written in "pico8 lua" inside of P
 Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 can be used in non-commerical projects of any kind, *excluding* projects related to NFTs or LLM/genAI promotion or model training.
 
 ## TODO
+- [ ] sfx/music - help welcome
 - [ ] CONTRIBUTORS.md
 - [ ] set better scope expectations. how much emulation accuracy are we shooting for (not much)
 - [x] `#include` lint

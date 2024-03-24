@@ -75,9 +75,9 @@ if false then
 	end
 else
 	-- windowed
-	local path = env().path
+	local title = _fetch_local("./window_title.txt")
 	window {
-		title = path and "p8x8 - "..path or "p8x8",
+		title = title,
 		width = 128,
 		height = 128,
 		resizeable = false,
