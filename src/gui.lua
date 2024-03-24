@@ -1,9 +1,8 @@
---[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-18 02:34:47",revision=438]]
+--[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-18 07:44:15",revision=535]]
+local footh = 21 --size of gray footer area
 function generate_gui( w,h)
 	local w = w or get_display():width()
 	local h = h or get_display():height()
-	local footh = 21
-	gui_extra_h = footh
 	
 	gui = create_gui()
 	
@@ -23,10 +22,10 @@ function generate_gui( w,h)
 			else
 				print(table.concat({
 					"   -==INSTRUCTIONS==-",
-					"1. copy sprites from pico8",
-					"2. paste here",
-					"3. save",
-					"4. close&reopen gfx editor",
+					"1. drag a .p8 file here",
+					"  (or copypaste sprites)",
+					"2. save",
+					"3. close&reopen editors",
 					"",
 					" enjoy!          -pancelor",
 					},"\n"),4,8,13)
@@ -40,34 +39,46 @@ function generate_gui( w,h)
 			rectfill(0,0,self.width-1,self.height-1,6)
 		end,
 	}
-	footer:attach_button{
-		label = "Clear",
-		x=4,y=4,
-		bgcol=0x070d,
-		click = clear_img,
-	}
-	
-	footer:attach_button{
-		label = "Save..",
-		x=-4,y=4,justify="right",
-		bgcol=0x070d,
-		click = on_click_save,
-	}
-	footer:attach_button{
-		label = "Paste",
-		x=-48,y=4,justify="right",
-		bgcol=0x070d,
-		click = set_img_from_clipboard,
-	}
 	
 --	footer:attach_button{
 --		label = "Clear",
---		x=-90,y=4,justify="right",
+--		x=4,y=4,
 --		bgcol=0x070d,
---		click = function(self)
---			rm("/ram/cart/gfx/0.gfx")
---			create_process("/system/apps/gfx.p64", {argv={"/ram/cart/gfx/0.gfx"}})
---		end,
+--		click = reset_sprimp,
 --	}
-
+	
+	footer:attach_button{
+		label = "Save gfx..",
+		x=4,y=4,
+		bgcol=0x070d,
+		click = on_click_savegfx,
+	}
+--	footer:attach_button{
+--		label = "Paste",
+--		x=-48,y=4,justify="right",
+--		bgcol=0x070d,
+--		click = set_img_from_clipboard,
+--	}
+	
+	footer:attach_button{
+		label = "Save map..",
+		x=-4,y=4,justify="right",
+		bgcol=0x070d,
+		click = on_click_savemap,
+	}
 end
+
+-- resize the window so that the main area will fit a w,h image
+-- will only grow the window, will not shrink
+function gui_resize_to_fit(w,h)
+	w = max(get_display():width(), w)
+	h = max(get_display():height(), h+footh)
+	window{
+		width = w,
+		height = h,
+	}
+
+	generate_gui()
+end
+
+
