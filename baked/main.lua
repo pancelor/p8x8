@@ -75,12 +75,16 @@ if false then
 	end
 else
 	-- windowed
+	local path = env().path
 	window {
-		title = env().path,
+		title = path and "p8x8 - "..path or "p8x8",
 		width = 128,
 		height = 128,
 		resizeable = false,
 	}
+	has_focus = true --used by btn/btnp
+	on_event("gained_focus", function() has_focus = true end)
+	on_event("lost_focus", function() has_focus = false end) --comment out for global controls (multiple games at once!)
 	function p8x8_draw()
 		-- can't set directly b/c cart might overwrite it
 		p8env._draw()

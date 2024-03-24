@@ -101,28 +101,36 @@ function p8env.btn(b, p)
 	local fn=btn
 	p=(p or 0)*8
 	if b then
-		return fn(b+p)!=false
+		return has_focus and fn(b+p)!=false
 	else
-		return (fn(p) and 1 or 0)
-			|(fn(1+p) and 2 or 0)
-			|(fn(2+p) and 4 or 0)
-			|(fn(3+p) and 8 or 0)
-			|(fn(4+p) and 16 or 0)
-			|(fn(5+p) and 32 or 0)
+		if has_focus then
+			return (fn(p) and 1 or 0)
+				|(fn(1+p) and 2 or 0)
+				|(fn(2+p) and 4 or 0)
+				|(fn(3+p) and 8 or 0)
+				|(fn(4+p) and 16 or 0)
+				|(fn(5+p) and 32 or 0)
+		else
+			return 0
+		end
 	end
 end
 function p8env.btnp(b, p)
 	local fn=btnp
 	p=(p or 0)*8
 	if b then
-		return fn(b+p)!=false or (saved_btnp>>(b+p))&1==1 --see main.lua
+		return has_focus and fn(b+p)!=false or (saved_btnp>>(b+p))&1==1 --see main.lua
 	else
-		return (fn(p) and 1 or 0)
-			|(fn(1+p) and 2 or 0)
-			|(fn(2+p) and 4 or 0)
-			|(fn(3+p) and 8 or 0)
-			|(fn(4+p) and 16 or 0)
-			|(fn(5+p) and 32 or 0)|saved_btnp
+		if has_focus then
+			return (fn(p) and 1 or 0)
+				|(fn(1+p) and 2 or 0)
+				|(fn(2+p) and 4 or 0)
+				|(fn(3+p) and 8 or 0)
+				|(fn(4+p) and 16 or 0)
+				|(fn(5+p) and 32 or 0)|saved_btnp
+		else
+			return 0
+		end
 	end
 end
 
