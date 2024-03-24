@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-18 07:44:15",revision=535]]
+--[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-19 05:50:51",revision=692]]
 local footh = 21 --size of gray footer area
 function generate_gui( w,h)
 	local w = w or get_display():width()

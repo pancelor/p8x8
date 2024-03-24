@@ -1,6 +1,9 @@
---[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-18 07:44:15",revision=616]]
+--[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-19 05:50:51",revision=804]]
+printh"---"
 include "src/pq.lua"
 include "src/gui.lua"
+include "src/import.lua"
+include "src/tool.lua"
 
 function _init()
 	reset_sprimp() --set up the window
@@ -13,14 +16,27 @@ function _init()
 	}
 	menuitem{
 		id = "open_file",
-		label = "\^:7f4141417f616500 Import .p8 File",
+		label = "\^:00387f7f7f7f7f00 Import .p8",
 		shortcut = "CTRL-O",
 		action = function()
 			real_intention="import_p8"
 			create_process("/system/apps/filenav.p64", {
 				path="/desktop",
 				intention="save_file_as", -- TODO: I'd rather use "open_file" but the filesystem doesn't let me process the file -- it tries to literally open it (and fails b/c it doesn't know how to open a .p8)
-				window_attribs={workspace = "current", autoclose=true},
+				window_attribs={workspace="current", autoclose=true},
+			})
+		end,
+	}
+	menuitem{
+		id = "export_p64",
+		label = "\^:7f4141417f616500 Export .p64",
+		shortcut = "CTRL-E",
+		action = function()
+			real_intention="export_p64"
+			create_process("/system/apps/filenav.p64", {
+				path="/desktop",
+				intention="save_file_as",
+				window_attribs={workspace="current", autoclose=true},
 			})
 		end,
 	}
@@ -60,18 +76,21 @@ on_event("save_file_as", function(msg)
 		export_gfx(msg.filename)
 	elseif real_intention=="export_map" then
 		export_map(msg.filename)
+	elseif real_intention=="export_p64" then
+		export_p64(msg.filename)
 	end
 end)
 
 
----------------
--- IMPORTING --
----------------
+----------
+-- DATA --
+----------
 
 
 function reset_sprimp()
-	img=nil
-	mapdat=nil
+	cart = nil  --HACK: awkward that both this and img exist(?)
+	img = nil
+	
 	window{
 		width  = 140,
 		height = 120,
@@ -80,21 +99,22 @@ function reset_sprimp()
 	generate_gui()
 end
 
+-- pass a string like "[gfx]...[/gfx]" to load it into the `img` global
 function set_img_from_clipboard()
-	return set_img_from_gfx(get_clipboard())
-end
-
--- pass a "[gfx]...[/gfx]" string to load it into the `img` global
-function set_img_from_gfx(str)
-	local newimg = userdata(str)
-	if not newimg then
+	local str = get_clipboard()
+	local ud = userdata(str)
+	if not ud then
 		notify(string.format("* error: want '[gfx]...[/gfx]', got '%s...'",sub(str,0,4)))
 		return
 	end
-	img=newimg
+	set_img_from_ud(ud)
+end
+
+function set_img_from_ud(ud)
+	if not ud then return end
+	img = ud
 	
 	-- resize window to fit spritesheet
-
 	local w,h = img:attribs()
 	gui_resize_to_fit(w,h)
 end
@@ -121,92 +141,6 @@ on_event("drop_items",function(msg)
 		notify(err)
 	end
 end)
-
-function import_p8(fullpath)
-	local filestr = fetch(fullpath)
-	assert(filestr)
-	
-	do
-		-- __gfx__
-		-- thanks Krystman! https://www.youtube.com/@LazyDevs
-		-- https://www.lexaloffle.com/bbs/?pid=143596#p
-		local hexdata = p8_section_extract(filestr,"__gfx__")
-		if not hexdata then
-			notify("* error: no __gfx__ section found")
-			return
-		end
-		hexdata = hexdata:gsub("\n", "")
-		local w,h = 128,128
-		local sizestr = string.format("%02x%02x",mid(0,255,w),mid(0,255,h))
-		set_img_from_gfx("[gfx]"..sizestr..hexdata.."[/gfx]")
-	end
-	
-	do
-		-- __map__
-		local hexdata = p8_section_extract(filestr,"__map__")
-		if not hexdata then
-			notify("* error: no __map__ section found")
-			return
-		end
-		hexdata = hexdata:gsub("\n", "")
-		set_map_from_hexdata(hexdata)
-	end
-end
-
-function set_map_from_hexdata(hexdata)
-	-- bmp holds i16s: ?({fetch("/ram/cart/map/0.map")[1].bmp:attribs()})[3]
-	-- they're more than just u8 b/c tile flipping is supported (what else?)
-	local w,h = 128,64
-	local bmp = userdata("i16",w,h)
-	for i=0,#hexdata/2-1 do
-		local x,y = i%w,i\w
-		if x<w and y<h then
-			local byte = tonumber("0x"..sub(hexdata,i*2+1,i*2+2))
-			bmp:set(x,y,byte)
-		end
-	end
-	-- view expected structure with: podtree /ram/cart/map/0.map
-	mapdat = {
-		{ -- just one layer
-			bmp = bmp,
-			tile_w = 8,
-			tile_h = 8,
-			-- start view in top-left
-			pan_x = -188,
-			pan_y = -10,
-			zoom = 0.5,
-		},
-	}
-end
-
--- returns the contents of a pico8 file section (e.g. __gfx__)
--- returns the entire string, with newlines and all
--- returns nil if the section can't be found
--- usage: local gfxstr = p8_section_extract(filestr,"__gfx__"):gsub("\n", "")
-function p8_section_extract(filestr,header)
-	local i0,i1 = p8_section_find(filestr, header)
-	if not i0 then
-		return
-	end
-	return filestr:sub(i0,i1)
-end
-
--- e.g. p8_section_find(myFile,"__gfx__")
--- returns indices for use with str:sub()
--- usage: local gfx = filestr:sub(p8_section_find(filestr,"__gfx__"))
-function p8_section_find(filestr,header)
-	local a0,a1 = string.find(filestr,header)
-	if not a0 then
-		return
-	end
-	-- find next section, or EOF
-	local b0 = string.find(filestr, "__", a1+1)
-	if b0 then
-		return a1+1, b0-1
-	else
-		return a1+1, #filestr
-	end
-end
 
 --on_event("open_file",function(...)
 --	pqn(...)
@@ -244,21 +178,33 @@ function on_click_savemap()
 end
 
 function export_map(fullpath)
-	if not mapdat then
+	if not cart or not cart.map then
 		notify("* error: no map data")
 		return
 	end
 	assert(fullpath,"no filename?")
 
+	-- view expected structure with: podtree /ram/cart/map/0.map
+	local mapdat = {
+		{ -- first map layer
+			bmp = cart.map,
+			tile_w = 8,
+			tile_h = 8,
+			-- start view in top-left
+			pan_x = -188,
+			pan_y = -10,
+			zoom = 0.5,
+		},
+	}
 	store(fullpath, mapdat) --save
-
+	notify("exported "..fullpath)
 	-- open gfx editor
-	create_process("/system/util/open.lua",
-		{
-			argv = {fullpath},
-			pwd = "/ram/cart",
-		}
-	)
+--	create_process("/system/util/open.lua",
+--		{
+--			argv = {fullpath},
+--			pwd = "/ram/cart",
+--		}
+--	)
 end
 
 function export_gfx(fullpath)
@@ -268,6 +214,7 @@ function export_gfx(fullpath)
 	end
 	assert(fullpath,"no filename?")
 	
+	local gff = cart and cart.gff
 	local iw,ih = img:attribs()
 
 	local sprites = {}
@@ -280,7 +227,7 @@ function export_gfx(fullpath)
 			-- see /system/apps/gfx.p64
 			sprites[i] = {
 				bmp = bmp,
-				flags = 0,
+				flags = gff and gff[i] or 0,
 				zoom = 8,
 				pan_x = 0,
 				pan_y = 0,
@@ -288,14 +235,70 @@ function export_gfx(fullpath)
 		end
 	end
 	store(fullpath, sprites) --save
-
+	notify("exported "..fullpath)
 	-- open gfx editor
-	create_process("/system/util/open.lua",
-		{
-			argv = {fullpath},
-			pwd = "/ram/cart",
-		}
-	)
+--	create_process("/system/util/open.lua",
+--		{
+--			argv = {fullpath},
+--			pwd = "/ram/cart",
+--		}
+--	)
 end
+
+function export_p64(fullpath)
+	if not cart then
+		notify("* error: must import a .p8 first")
+		return
+	end
+	assert(fullpath,"no filename?")
+
+	if fullpath:ext() != "p64" then
+		notify("* error: must export as a .p64")
+		return
+	end
+	if fstat(fullpath) then
+		notify("* error: must export a new file, cannot overwrite one")
+		return
+	end
+
+	-- ensure trailing slash
+	if sub(fullpath,#fullpath)!="/" then
+		fullpath ..="/"
+	end	
+
+	mkdir(fullpath)
+	mkdir(fullpath.."gfx")
+	mkdir(fullpath.."map")
+	mkdir(fullpath.."src")
+	mkdir(fullpath.."sfx") -- probably not necessary? but startup.lua makes it by default
+
+	export_gfx(fullpath.."gfx/0.gfx")
+	export_map(fullpath.."map/0.map")
+	-- export code tabs
+	for ti=1,#cart.lua do
+		local fname = string.format("%ssrc/%d.lua",fullpath,ti-1)
+		store(fname,cart.lua[ti])
+	end
+	
+	-- store open file metadata
+	-- see /system/wm/wm.lua:save_open_locations_metadata or new.lua (bbs util)
+	-- TODO maybe export into /ram/cart ? don't want to overwrite without warning tho..
+
+	--pq(fetch_metadata("/desktop/03mar/sprimp.p64"))
+	local meta = {}
+	meta.workspaces = {}
+	add(meta.workspaces, {location = "map/0.map", workspace_index=3})
+	add(meta.workspaces, {location = "gfx/0.gfx", workspace_index=2})
+	for ti=1,#cart.lua do
+		local fname = string.format("src/%d.lua#1",ti-1)
+		add(meta.workspaces, {location = fname, workspace_index=1})
+	end	
+	store_metadata(fullpath,meta)
+
+	notify("exported "..fullpath)
+end
+
+
+
 
 
