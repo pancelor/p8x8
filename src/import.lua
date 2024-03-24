@@ -1,11 +1,12 @@
---[[pod_format="raw",created="2024-03-19 02:49:51",modified="2024-03-19 05:50:51",revision=240]]
-function import_p8(fullpath)
-	cart=parse_p8(fullpath)
-	set_img_from_ud(cart.gfx)
+--[[pod_format="raw",created="2024-03-19 02:49:51",modified="2024-03-20 02:22:31",revision=490]]
+function import_p8(path)
+	cartdata=parse_p8(path)
+	gui_set_preview_image(cartdata.gfx)
+	check_code_warnings(cartdata.lua)
 end
 
-function parse_p8(fullpath)
-	local filestr = fetch(fullpath)
+function parse_p8(path)
+	local filestr = fetch(path)
 	assert(filestr)
 	
 	local cart={}
@@ -69,28 +70,45 @@ end
 
 -- returns a userdata holding the map
 function parse_p8_map(filestr)
-	local hexdata = p8_section_extract(filestr,"__map__")
-	if not hexdata then
+	local mapdata = p8_section_extract(filestr,"__map__")
+	if not mapdata then
 		notify("* error: no __map__ section found")
 		return
 	end
-	hexdata = hexdata:gsub("\n", "")
-	return build_map_ud_from_hexdata(hexdata)
-end
+	mapdata = mapdata:gsub("\n", "")
 
-function build_map_ud_from_hexdata(hexdata)
+	local gfxdata = p8_section_extract(filestr,"__gfx__")
+	if not gfxdata then
+		notify("* error: no __gfx__ section found")
+		return
+	end
+	gfxdata = split(gfxdata,"\n",false) -- NOTE: array of lines
+
 	-- bmp holds i16s: ?({fetch("/ram/cart/map/0.map")[1].bmp:attribs()})[3]
 	-- they're more than just u8 b/c tile flipping is supported (what else?)
 	local w,h = 128,64
 	local ud = userdata("i16",w,h)
-	for i=0,#hexdata/2-1 do
+	for i=0,#mapdata/2-1 do
 		local x,y = i%w,i\w
 		if x<w and y<h then
-			local n1 = num_from_hex(sub(hexdata,i*2+1,i*2+1))
-			local n2 = num_from_hex(sub(hexdata,i*2+2,i*2+2))
+			local n1 = num_from_hex(sub(mapdata,i*2+1,i*2+1))
+			local n2 = num_from_hex(sub(mapdata,i*2+2,i*2+2))
 			ud:set(x,y,n1*16+n2)
 		end
 	end
+	
+	-- extract rest of map from sprites
+	for i=65,#gfxdata do
+		local ln = gfxdata[i]
+		for j=0,#ln/2-1 do
+			local n1 = num_from_hex(sub(ln,j*2+1,j*2+1))
+			local n2 = num_from_hex(sub(ln,j*2+2,j*2+2))
+			local tile = n2*16+n1
+			local x,y = j + (i&1==1 and 0 or 64), (i-1)\2
+			ud:set(x,y,tile)
+		end
+	end
+	
 	return ud
 end
 

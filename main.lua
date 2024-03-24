@@ -1,18 +1,21 @@
---[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-19 05:50:51",revision=804]]
+--[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-20 02:22:31",revision=1042]]
 printh"---"
 include "src/pq.lua"
-include "src/gui.lua"
-include "src/import.lua"
 include "src/tool.lua"
 
+include "src/gui.lua"
+include "src/import.lua"
+include "src/warn.lua"
+include "src/export.lua"
+
 function _init()
-	reset_sprimp() --set up the window
+	reset_state() --set up the window
 
 	menuitem{
 		id = "clear",
 		label = "\^:0f19392121213f00 Clear",
 		shortcut = "CTRL-N",
-		action = reset_sprimp,
+		action = reset_state,
 	}
 	menuitem{
 		id = "open_file",
@@ -31,14 +34,7 @@ function _init()
 		id = "export_p64",
 		label = "\^:7f4141417f616500 Export .p64",
 		shortcut = "CTRL-E",
-		action = function()
-			real_intention="export_p64"
-			create_process("/system/apps/filenav.p64", {
-				path="/desktop",
-				intention="save_file_as",
-				window_attribs={workspace="current", autoclose=true},
-			})
-		end,
+		action = action_export_p64,
 	}
 
 	-- edit palette (bg checkboard)
@@ -47,9 +43,6 @@ function _init()
 end
 
 function _update()
-	if key"ctrl" and keyp"v" then
-		set_img_from_clipboard()
-	end
 	if has_focus then
 		gui:update_all()
 	end
@@ -72,10 +65,6 @@ on_event("save_file_as", function(msg)
 	-- HACK: open_file doesn't work nicely, so I run multiple actions pretending to be "save as", because they let me give the user a file chooser without taking any automatic action
 	if real_intention=="import_p8" then
 		import_p8(msg.filename)
-	elseif real_intention=="export_gfx" then
-		export_gfx(msg.filename)
-	elseif real_intention=="export_map" then
-		export_map(msg.filename)
 	elseif real_intention=="export_p64" then
 		export_p64(msg.filename)
 	end
@@ -87,36 +76,16 @@ end)
 ----------
 
 
-function reset_sprimp()
-	cart = nil  --HACK: awkward that both this and img exist(?)
-	img = nil
-	
+function reset_state()
+	cartdata = nil
+	gui_set_preview_image(nil)
+
 	window{
 		width  = 140,
 		height = 120,
-		title  = "p8 spr/map import",
+		title  = "p8x8 converter",
 	}
 	generate_gui()
-end
-
--- pass a string like "[gfx]...[/gfx]" to load it into the `img` global
-function set_img_from_clipboard()
-	local str = get_clipboard()
-	local ud = userdata(str)
-	if not ud then
-		notify(string.format("* error: want '[gfx]...[/gfx]', got '%s...'",sub(str,0,4)))
-		return
-	end
-	set_img_from_ud(ud)
-end
-
-function set_img_from_ud(ud)
-	if not ud then return end
-	img = ud
-	
-	-- resize window to fit spritesheet
-	local w,h = img:attribs()
-	gui_resize_to_fit(w,h)
 end
 
 -- drag-and-drop .p8 files from the desktop
@@ -146,159 +115,15 @@ end)
 --	pqn(...)
 --end)
 
-
----------------
--- EXPORTING --
 ---------------
 
-
-function on_click_savegfx()
-	if not img then
-		notify("* error: no image data")
-		return
-	end
-	real_intention="export_gfx"
+function action_export_p64()
+	real_intention="export_p64"
 	create_process("/system/apps/filenav.p64", {
-		path="/ram/cart/gfx",
+		path="/desktop",
 		intention="save_file_as",
-		window_attribs={workspace = "current", autoclose=true},
+		window_attribs={workspace="current", autoclose=true},
 	})
 end
-function on_click_savemap()
-	if not mapdat then
-		notify("* error: no map data")
-		return
-	end
-	real_intention="export_map"
-	create_process("/system/apps/filenav.p64", {
-		path="/ram/cart/map",
-		intention="save_file_as",
-		window_attribs={workspace = "current", autoclose=true},
-	})
-end
-
-function export_map(fullpath)
-	if not cart or not cart.map then
-		notify("* error: no map data")
-		return
-	end
-	assert(fullpath,"no filename?")
-
-	-- view expected structure with: podtree /ram/cart/map/0.map
-	local mapdat = {
-		{ -- first map layer
-			bmp = cart.map,
-			tile_w = 8,
-			tile_h = 8,
-			-- start view in top-left
-			pan_x = -188,
-			pan_y = -10,
-			zoom = 0.5,
-		},
-	}
-	store(fullpath, mapdat) --save
-	notify("exported "..fullpath)
-	-- open gfx editor
---	create_process("/system/util/open.lua",
---		{
---			argv = {fullpath},
---			pwd = "/ram/cart",
---		}
---	)
-end
-
-function export_gfx(fullpath)
-	if not img then
-		notify("* error: no image data")
-		return
-	end
-	assert(fullpath,"no filename?")
-	
-	local gff = cart and cart.gff
-	local iw,ih = img:attribs()
-
-	local sprites = {}
-	for i=0,255 do
-		local bmp = userdata("u8",8,8)
-		local x,y = i%16*8,i\16*8
-		if x+8<=iw and y+8<=ih then
-			--pq("blit",x,y)
-			blit(img,bmp,x,y,0,0) --from,to, fromx,y, tox,y, w,h
-			-- see /system/apps/gfx.p64
-			sprites[i] = {
-				bmp = bmp,
-				flags = gff and gff[i] or 0,
-				zoom = 8,
-				pan_x = 0,
-				pan_y = 0,
-			}
-		end
-	end
-	store(fullpath, sprites) --save
-	notify("exported "..fullpath)
-	-- open gfx editor
---	create_process("/system/util/open.lua",
---		{
---			argv = {fullpath},
---			pwd = "/ram/cart",
---		}
---	)
-end
-
-function export_p64(fullpath)
-	if not cart then
-		notify("* error: must import a .p8 first")
-		return
-	end
-	assert(fullpath,"no filename?")
-
-	if fullpath:ext() != "p64" then
-		notify("* error: must export as a .p64")
-		return
-	end
-	if fstat(fullpath) then
-		notify("* error: must export a new file, cannot overwrite one")
-		return
-	end
-
-	-- ensure trailing slash
-	if sub(fullpath,#fullpath)!="/" then
-		fullpath ..="/"
-	end	
-
-	mkdir(fullpath)
-	mkdir(fullpath.."gfx")
-	mkdir(fullpath.."map")
-	mkdir(fullpath.."src")
-	mkdir(fullpath.."sfx") -- probably not necessary? but startup.lua makes it by default
-
-	export_gfx(fullpath.."gfx/0.gfx")
-	export_map(fullpath.."map/0.map")
-	-- export code tabs
-	for ti=1,#cart.lua do
-		local fname = string.format("%ssrc/%d.lua",fullpath,ti-1)
-		store(fname,cart.lua[ti])
-	end
-	
-	-- store open file metadata
-	-- see /system/wm/wm.lua:save_open_locations_metadata or new.lua (bbs util)
-	-- TODO maybe export into /ram/cart ? don't want to overwrite without warning tho..
-
-	--pq(fetch_metadata("/desktop/03mar/sprimp.p64"))
-	local meta = {}
-	meta.workspaces = {}
-	add(meta.workspaces, {location = "map/0.map", workspace_index=3})
-	add(meta.workspaces, {location = "gfx/0.gfx", workspace_index=2})
-	for ti=1,#cart.lua do
-		local fname = string.format("src/%d.lua#1",ti-1)
-		add(meta.workspaces, {location = fname, workspace_index=1})
-	end	
-	store_metadata(fullpath,meta)
-
-	notify("exported "..fullpath)
-end
-
-
-
 
 

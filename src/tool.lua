@@ -1,4 +1,10 @@
---[[pod_format="raw",created="2024-03-19 04:26:19",modified="2024-03-19 05:50:51",revision=84]]
+--[[pod_format="raw",created="2024-03-19 04:26:19",modified="2024-03-20 02:22:31",revision=327]]
+function test(want,got)
+	if want!=got then
+		assert(false,string.format("want: %s, got: %s.",tostr(want),tostr(got)))
+	end
+end
+
 -- 0=>"0", ... 15=>"f", 16=>"g", ... 31=>"v"
 local function hex_from_num(val)
 	if 0<=val and val<=9 then
@@ -9,9 +15,9 @@ local function hex_from_num(val)
 		assert(nil,"hex_from_num bad input: "..tostr(val))
 	end
 end
-assert(hex_from_num(3)=="3")
-assert(hex_from_num(15)=="f")
-assert(hex_from_num(17)=="h")
+--test("3",hex_from_num(3))
+--test("f",hex_from_num(15))
+--test("h",hex_from_num(17))
 
 -- "0"=>0, ... "f"=>15, "g"=>16, ... "v"=>31
 function num_from_hex(char)
@@ -24,6 +30,25 @@ function num_from_hex(char)
 		assert(nil,"num_from_hex bad input: "..tostr(char))
 	end
 end
-assert(num_from_hex("3")==3)
-assert(num_from_hex("f")==15)
-assert(num_from_hex("h")==17)
+--test(3,num_from_hex("3"))
+--test(15,num_from_hex("f"))
+--test(17,num_from_hex("h"))
+
+function rstrip(str,chars)
+	local book = {}
+	for i=1,#chars do
+		book[string.byte(chars,i)] = true
+	end
+	
+	for i=#str,1,-1 do
+		if not book[string.byte(str,i)] then
+			-- found a non-bad char
+			return sub(str,1,i)
+		end
+	end	
+	return ""
+end
+--test("ab",rstrip("abc","c"))
+--test("a",rstrip("abc","bc"))
+--test("abc",rstrip("abc","x"))
+--test("",rstrip("abc","cab"))

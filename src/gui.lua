@@ -1,5 +1,6 @@
---[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-19 05:50:51",revision=692]]
+--[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-20 02:22:31",revision=920]]
 local footh = 21 --size of gray footer area
+local preview_img
 function generate_gui( w,h)
 	local w = w or get_display():width()
 	local h = h or get_display():height()
@@ -15,17 +16,17 @@ function generate_gui( w,h)
 					rectfill(x,y,x+3,y+3,col)
 				end
 			end
-			if img then
+			if preview_img then
 				palt(0,false)
-				spr(img,self.width/2-img:width()/2,self.height/2-img:height()/2)
+				local w,h = preview_img:attribs()
+				spr(preview_img,self.width/2-w/2,self.height/2-h/2)
 				palt()
 			else
 				print(table.concat({
 					"   -==INSTRUCTIONS==-",
 					"1. drag a .p8 file here",
-					"  (or copypaste sprites)",
-					"2. save",
-					"3. close&reopen editors",
+					"2. export as .p64",
+					"3. manually fix the code",
 					"",
 					" enjoy!          -pancelor",
 					},"\n"),4,8,13)
@@ -40,37 +41,22 @@ function generate_gui( w,h)
 		end,
 	}
 	
---	footer:attach_button{
---		label = "Clear",
---		x=4,y=4,
---		bgcol=0x070d,
---		click = reset_sprimp,
---	}
-	
 	footer:attach_button{
-		label = "Save gfx..",
+		label = "Export p64",
 		x=4,y=4,
 		bgcol=0x070d,
-		click = on_click_savegfx,
-	}
---	footer:attach_button{
---		label = "Paste",
---		x=-48,y=4,justify="right",
---		bgcol=0x070d,
---		click = set_img_from_clipboard,
---	}
-	
-	footer:attach_button{
-		label = "Save map..",
-		x=-4,y=4,justify="right",
-		bgcol=0x070d,
-		click = on_click_savemap,
+		click = action_export_p64,
 	}
 end
 
--- resize the window so that the main area will fit a w,h image
--- will only grow the window, will not shrink
-function gui_resize_to_fit(w,h)
+-- resize the window and set the image
+function gui_set_preview_image(ud)
+	preview_img = ud
+	if not preview_img then return end
+	
+	-- resize window to fit spritesheet
+	local w,h = ud:attribs()
+	-- will only grow the window, will not shrink	
 	w = max(get_display():width(), w)
 	h = max(get_display():height(), h+footh)
 	window{
