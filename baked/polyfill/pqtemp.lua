@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-21 12:39:17",modified="2024-03-21 13:06:39",revision=20]]
+--[[pod_format="raw",created="2024-03-21 12:39:17",modified="2024-03-22 03:04:16",revision=34]]
 -- pq-debugging, by @pancelor
 -- quotes all args and prints to host console
 -- usage:
@@ -12,7 +12,10 @@ p8env.pq=pq
 
 -- pq(), and also notify()
 function pqn(...)
-	notify(pq(...))
+	local s=qq(...)
+	notify(s)
+	printh(s)
+	return s
 end
 p8env.pqn=pqn
 

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 22:23:15",modified="2024-03-21 13:06:39",revision=299]]
+--[[pod_format="raw",created="2024-03-19 22:23:15",modified="2024-03-22 14:04:27",revision=521]]
 --[[
 the goal is to make major things work.
   but the goal is NOT to be a 1:1 pico8 emulator.
@@ -20,7 +20,7 @@ local function planned(name, basic)
 		end
 	else
 		return function()
-			compat("todo: "..name.." support")
+			compat("todo: support for "..name)
 		end
 	end
 end
@@ -29,15 +29,6 @@ p8env.cocreate=planned"cocreate"
 p8env.coresume=planned"coresume"
 p8env.costatus=planned"costatus"
 p8env.yield=planned"yield"
-
-p8env.menuitem=planned"menuitem"
-
---mem.lua
-p8env.cartdata=planned"cartdata"
-p8env.dget=planned"dget"
-p8env.dset=planned"dset"
-p8env.reload=planned"reload"
-p8env.stat=planned("stat",true)
 
 p8env.run=planned("run",true)
 p8env.ls=planned"ls"

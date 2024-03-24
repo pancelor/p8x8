@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 09:34:40",modified="2024-03-21 13:06:39",revision=320]]
+--[[pod_format="raw",created="2024-03-19 09:34:40",modified="2024-03-22 14:26:42",revision=580]]
 function compat(msg)
 	printh("COMPAT: "..msg)
 	-- comment this assert() out if you want to run despite compatibility issues:
@@ -42,27 +42,52 @@ end
 
 
 -- init/update/draw
-
---vid(0) local winw,winh = 480,270
-vid(3) local winw,winh = 240,135
-p8x8camx,p8x8camy = 64-winw/2,64-winh/2
-camera(p8x8camx,p8x8camy)
-
-local first_draw=true
-function p8x8_draw()
-	if first_draw then
-		first_draw=false
-		fillp(20927.5)
-		rectfill(x-8,y-8,x+127+8,y+127+8,14)
-		fillp()
-		rectfill(x+116,y+129,x+134,y+127+8,14)
-		print("p8x8",x+118,y+130,0x17)
-		rectfill(x,y,x+127,y+127,0)
+local p8x8_draw
+if false then
+	-- fullscreen
+	local p8canvas = userdata("u8",128,128)
+		
+	vid(0)  local winw,winh = 480,270
+	--vid(3)  local winw,winh = 240,135 -- ok size but very bad flashing...
+	
+	local first_draw=true
+	p8x8_draw = function()
+		local x,y = winw/2-64,winh/2-64
+		if first_draw then
+			first_draw=false
+			fillp(20927.5)
+			rectfill(x-8,y-8,x+127+8,y+127+8,14)
+			fillp()
+			rectfill(x+116,y+129,x+134,y+127+8,14)
+			print("p8x8",x+118,y+130,0x17)
+	--		rectfill(x,y,x+127,y+127,0)
+		end
+		set_draw_target(p8canvas)
+		p8env._draw()
+		set_draw_target()
+		blit(p8canvas,get_draw_target(),0,0,x,y)
+--[[
+		local a,b=camera()
+		palt(0,false)
+		spr(p8canvas,0,0)
+		camera(a,b)
+--]]
 	end
-	clip(x,y,128,128)
-	p8env._draw()
+else
+	-- windowed
+	window {
+		title = env().path,
+		width = 128,
+		height = 128,
+		resizeable = false,
+	}
+	function p8x8_draw()
+		-- can't set directly b/c cart might overwrite it
+		p8env._draw()
+	end
 end
 
+saved_btnp=0 --used by p8env.btnp. to deal with 30fps
 if p8env._update then
 	--30fps
 	--[[
@@ -82,6 +107,9 @@ if p8env._update then
 		showframe=not showframe
 		if showframe then
 			p8env._update()
+		else
+			saved_btnp=0
+			saved_btnp=p8env.btnp()
 		end
 	end
 	function _draw()
@@ -91,6 +119,9 @@ if p8env._update then
 	end
 else
 	_init=p8env._init
-	_update=p8env._update
+	function _update()
+		-- can't set directly b/c cart might overwrite it
+		p8env._update60()
+	end
 	_draw=p8x8_draw
 end

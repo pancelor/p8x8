@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 21:22:22",modified="2024-03-21 13:06:39",revision=341]]
+--[[pod_format="raw",created="2024-03-19 21:22:22",modified="2024-03-22 14:26:42",revision=583]]
 function export_p64(path)
 	if not cartdata then
 		notify("* error: must import a .p8 first")
@@ -54,8 +54,13 @@ function export_p64(path)
 		local fname = string.format("p8code/%d.lua#1",ti-1)
 		add(meta.workspaces, {location = fname, workspace_index=1})
 	end	
-	store_metadata(path,meta)
 
+	if 	cartdata.lua_warn then
+		store(path.."/warning.txt",cartdata.lua_warn)
+		add(meta.workspaces, {location = "warning.txt", workspace_index=1})
+	end
+	
+	store_metadata(path,meta)	
 	notify("exported "..path)
 end
 

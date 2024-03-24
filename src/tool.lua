@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 04:26:19",modified="2024-03-21 13:06:39",revision=417]]
+--[[pod_format="raw",created="2024-03-19 04:26:19",modified="2024-03-22 13:54:46",revision=542]]
 function test(want,got)
 	if want!=got then
 		assert(false,string.format("want: %s, got: %s.",tostr(want),tostr(got)))
@@ -52,3 +52,5 @@ end
 --test("a",rstrip("abc","bc"))
 --test("abc",rstrip("abc","x"))
 --test("",rstrip("abc","cab"))
+
+

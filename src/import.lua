@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 02:49:51",modified="2024-03-21 13:06:39",revision=610]]
+--[[pod_format="raw",created="2024-03-19 02:49:51",modified="2024-03-22 14:26:42",revision=849]]
 function import_p8(path)
 	local ext = path:ext()
 	if ext != "p8" then
@@ -8,8 +8,10 @@ function import_p8(path)
 	export_path = sub(path,1,-#ext-2)..".p64"
 	cartdata=parse_p8(path)
 	gui_set_preview_image(cartdata.gfx)
-	check_code_warnings(cartdata.lua)
+	process_code(cartdata)
 end
+
+
 
 function parse_p8(path)
 	local filestr = fetch(path)
@@ -20,6 +22,7 @@ function parse_p8(path)
 	cart.gfx=parse_p8_gfx(filestr)
 	cart.gff=parse_p8_gff(filestr)
 	cart.map=parse_p8_map(filestr)
+	cart.lua_warn=nil
 --	__label__
 --	cart.sfx=parse_p8_sfx(filestr)
 --	cart.music=parse_p8_music(filestr)
@@ -48,6 +51,14 @@ function parse_p8_lua(filestr)
 	return tabs
 end
 
+function rpad(str,pad,num)
+	if #str>num then
+		return str
+	end
+	assert(#pad==1)
+	return str..string.rep(pad,num-#str)
+end
+
 -- returns a userdata holding the graphics
 function parse_p8_gfx(filestr)
 	-- thanks Krystman! https://www.youtube.com/@LazyDevs
@@ -58,9 +69,8 @@ function parse_p8_gfx(filestr)
 		return
 	end
 	hexdata = hexdata:gsub("\n", "")
-	local w,h = 128,128
-	local sizestr = string.format("%02x%02x",mid(0,255,w),mid(0,255,h))
-	return userdata("[gfx]"..sizestr..hexdata.."[/gfx]")
+	hexdata = rpad(hexdata,"0",128*128)
+	return userdata("[gfx]8080"..hexdata.."[/gfx]")
 end
 
 -- returns a userdata holding the sprite flags
@@ -70,6 +80,7 @@ function parse_p8_gff(filestr)
 		return userdata("u8",256)
 	end
 	hexdata = hexdata:gsub("\n", "")
+	hexdata = rpad(hexdata,"0",256)
 	return userdata("u8",256,hexdata)
 end
 

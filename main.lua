@@ -1,17 +1,18 @@
---[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-21 13:06:39",revision=1168]]
+--[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-22 14:26:42",revision=1403]]
 printh"---"
 dev = true
 dev_include_lib = dev
 
 
 local function include_lib(name)
-	if dev_include_lib then
-		cp("/appdata/system/lib/"..name:basename(),name)
+	if dev_include_lib and not fstat(name) then
+		cp("/appdata/system/"..name,name)
 	end
 	include(name)
 end
 
-include_lib "src/pq.lua"
+include_lib "lib/pq.lua"
+include_lib "lib/sort.lua"
 include "src/tool.lua"
 
 include "src/gui.lua"

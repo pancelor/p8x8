@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 23:27:45",modified="2024-03-21 13:06:39",revision=281]]
+--[[pod_format="raw",created="2024-03-19 23:27:45",modified="2024-03-22 13:58:18",revision=468]]
 --swap fonts (see /system/lib/head.lua)
 poke(0x5f56, 0x56) -- primary font
 poke(0x5f57, 0x40) -- secondary font
@@ -22,19 +22,39 @@ function p8env.tline(x0,y0,x1,y1,mx,my, mdx,mdy)
 	]]	
 end
 
+p8env.camera=camera
+
+--[[
 local p8camx,p8camy = 0,0
 function p8env.camera(x,y)
 	local oldx,old = p8camx,p8camy
 	p8camx,p8camy = ((x or 0)\1)&65535,((y or 0)\1)&65535
-	camera(p8x8camx+p8camx,p8x8camy+p8camy)
+	camera(p8camx,p8camy)
 	return oldx,oldy
 end
+
 function p8env.reset()
 	p8env.camera()
 	reset()
 end
+--]]
+p8env.reset=reset
 
+-- COMPAT:
+--  pico8's cls() resets the clip region, and not the camera
+--  picotron's cls() resets neither
+--  p8x8 wont fix this; you must manually change your cart!
+--[[
+function p8env.cls(...)
+	clip()
+	local a,b=camera()
+	pqn(a,b,...)
+	rectfill(0,0,127,127,...)
+	camera(a,b)
+end
+--]]
 p8env.cls=cls
+
 p8env.fillp=fillp
 p8env.circ=circ
 p8env.circfill=circfill
@@ -48,31 +68,44 @@ p8env.pget=pget
 p8env.pset=pset
 p8env.rect=rect
 p8env.rectfill=rectfill
-p8env.flip=flip
+p8env.flip=flip -- TODO: needs to be doubled at 30fps
 
--- thanks NuSan! https://www.lexaloffle.com/bbs/?pid=143658#p
-function p8env.spr(_s,_x,_y,_w,_h,_mx,_my)
-	_w=_w or 1
-	_h=_h or 1
-	for i=0,_w-1 do
-		local _i=_mx and _w-i-1 or i
-		for j=0,_h-1 do
-			local _j=_my and _h-j-1 or j
-			--spr(_s+_i+_j*16,_x+i*8,_y+j*8,1,1,_mx,_my)
-			spr(_s+_i+_j*16,_x+i*8,_y+j*8,_mx,_my)
-		end
-	end
+-- NOTE: sspr() uses _gfx_all, spr() uses _gfx_sheet (unless w/h are >1).
+-- this means if you edit your sprites in the picotron editor, you
+-- need to edit both .gfx files. this is unfortunate! you could remove
+-- _gfx_sheet entirely and only use _gfx_all
+local _gfx_all,_gfx_sheet
+function reload_sprites()
+	_gfx_all = _fetch_local("gfx/full.gfx")[1].bmp
+	_gfx_sheet = _fetch_local("gfx/0.gfx")
 end
-
-local _sspr_full = fetch("gfx/full.gfx")[1].bmp
+reload_sprites()
 function p8env.sset(x,y,val)
-	_sspr_full:set(x,y,val&15)
+	_gfx_bmp:set(x,y,val&15)
+	local sx,sy = x\8,y\8
+	if sx&15==sx and sy&15==sy then
+		_gfx_sheet[sx+sy*16].bmp:set(x&7,y&7,val&15)
+	end
+	-- COMPAT: a more accurate emulator would edit the map here,
+	--   but p8x8 does not support that
 end
 function p8env.sget(x,y)
-	return _sspr_full:get(x,y)&15
+	return _gfx_all:get(x,y)&15
 end
 function p8env.sspr(...)
-	sspr(_sspr_full,...)
+	sspr(_gfx_all,...)
+end
+function p8env.spr(s,x,y,w,h,flpx,flpy)
+	s=(s or 0)\1
+	x=x or 0
+	y=y or 0
+	w=w or 1
+	h=h or 1
+	if w==1 and h==1 then
+		spr(s,x,y,flpx,flpy) --this implicitly uses _gfx_sheet
+	else
+		sspr(_gfx_all,(s&15)*8,s\16*8,w*8,h*8,x,y,w*8,h*8,flpx,flpy)
+	end
 end
 
 function p8env.fget(n, f)

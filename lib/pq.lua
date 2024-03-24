@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-21 09:14:17",modified="2024-03-21 09:17:39",revision=1]]
+--[[pod_format="raw",created="2024-03-21 09:14:17",modified="2024-03-22 03:04:46",revision=2]]
 -- pq-debugging, by @pancelor
 -- quotes all args and prints to host console
 -- usage:
@@ -11,7 +11,10 @@ end
 
 -- pq(), and also notify()
 function pqn(...)
-	notify(pq(...))
+	local s=qq(...)
+	notify(s)
+	printh(s)
+	return s
 end
 
 -- quotes all arguments into a string

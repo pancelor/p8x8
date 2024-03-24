@@ -1,14 +1,20 @@
---[[pod_format="raw",created="2024-03-19 22:11:50",modified="2024-03-21 13:06:39",revision=255]]
+--[[pod_format="raw",created="2024-03-19 22:11:50",modified="2024-03-22 08:52:07",revision=282]]
 -- make maps pico8-like
 
---this is a userdata object: https://www.lexaloffle.com/dl/docs/picotron_userdata.html
-local _map -- = userdata("i16",128,64)
-do
-	local map64 = fetch("map/0.map") 
+--_map is a userdata("i16",128,64)
+--  https://www.lexaloffle.com/dl/docs/picotron_userdata.html
+local _map 
+
+function load_map(path)
+	local map64 = _fetch_local(path) 
 	if map64 then
-		_map = map64[1].bmp --first layer
+		return map64[1].bmp --first layer
 	end
 end
+function reload_map() --also called externally, from mem.lua
+	_map = load_map"map/0.map"
+end
+reload_map()
 
 if not _map then
 	function p8env.mget() end
