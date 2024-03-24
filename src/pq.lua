@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 08:58:31",modified="2024-03-16 08:58:31",revision=0]]
+--[[pod_format="raw",created="2024-03-16 08:58:31",modified="2024-03-18 02:14:56",revision=3]]
 -- quote a single thing
 -- like tostr, but for tables
 function quote(t, sep)
@@ -24,19 +24,4 @@ function qq(...)
 	return s
 end
 function pq(...) printh(qq(...)) end
-
--- like sprintf (from c)
--- usage:
---   ?qf("%/% is %%",3,8,3/8*100,"%")
-function qf(fmt,...)
-	local parts,args=split(fmt,"%"),table.pack(...)
-	local str=deli(parts,1)
-	for ix,pt in ipairs(parts) do
-		str..=quote(args[ix])..pt
-	end
-	if args.n~=#parts then
-		str..="(extraqf:"..(args.n-#parts)..")"
-	end
-	return str
-end
-function pqf(...) printh(qf(...)) end
+function pqn(...) local s=qq(...) notify(s) pq(s) end
