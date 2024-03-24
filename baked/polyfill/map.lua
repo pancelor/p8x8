@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 22:11:50",modified="2024-03-20 02:06:01",revision=136]]
+--[[pod_format="raw",created="2024-03-19 22:11:50",modified="2024-03-21 13:06:39",revision=255]]
 -- make maps pico8-like
 
 --this is a userdata object: https://www.lexaloffle.com/dl/docs/picotron_userdata.html
@@ -11,7 +11,6 @@ do
 end
 
 if not _map then
-	printh "no map found"
 	function p8env.mget() end
 	function p8env.mset() end
 	function p8env.map() end
@@ -40,29 +39,26 @@ function p8env.map(celx,cely, sx,sy, celw,celh, flags)
 	celh = celh or 64
 	
 	-- TODO: speed: dont draw off-camera
-	local cx0 = celx
-	local cy0 = cely
-	local cx1 = cx0+celw-1
-	local cy1 = cy0+celh-1
 	local _mget = p8env.mget
 	if flags and flags!=0 then
-		for cy=cy0,cy1 do
-			for cx=cx0,cx1 do
-				local tile = _mget(cx,cy)
-				if tile>0 and fget(tile)&flags==flags then
-					spr(tile,sx+(cx-cx0)*8,sy+(cy-cy0)*8)
+		for dy=0,celh-1 do
+			for dx=0,celw-1 do
+				local tile = _mget(celx+dx,cely+dy)
+				if tile!=0 and fget(tile)&flags==flags then
+					spr(tile,sx+dx*8,sy+dy*8)
 				end
 			end
 		end
 	else
-		for cy=cy0,cy1 do
-			for cx=cx0,cx1 do
-				local tile = _mget(cx,cy)
-				if tile>0 then
-					spr(tile,sx+(cx-cx0)*8,sy+(cy-cy0)*8)
+		for dy=0,celh-1 do
+			for dx=0,celw-1 do
+				local tile = _mget(celx+dx,cely+dy)
+				if tile!=0 then
+					spr(tile,sx+dx*8,sy+dy*8)
 				end
 			end
 		end
 	end
 end
 p8env.mapdraw = p8env.map
+	

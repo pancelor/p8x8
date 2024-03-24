@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 22:54:36",modified="2024-03-20 01:21:32",revision=73]]
+--[[pod_format="raw",created="2024-03-19 22:54:36",modified="2024-03-21 13:06:39",revision=119]]
 ----------------
 -- MATH
 ----------------
@@ -47,12 +47,11 @@ function p8env.tostr(val, as_hex)
 end
 
 function p8env.tonum(x, flags)
-	if x==false then
-		x=0
-	end
 	if flags then
 		compat("tonum flags are not supported")
 	end
+	if x==true then return 1 end
+	if x==false then return 0 end
 	return tonumber(x)
 end
 
@@ -86,13 +85,32 @@ p8env.next=next
 -- MISC
 ----------------
 
+function _btn_help(fn,b, p)
+	-- picotron btn() returns either false or axis strength (0-255)
+	p=(p or 0)*8
+	if b then
+		return fn(b+p)!=false
+	else
+		return (fn(p) and 1 or 0)
+			|(fn(1+p) and 2 or 0)
+			|(fn(2+p) and 4 or 0)
+			|(fn(3+p) and 8 or 0)
+			|(fn(4+p) and 16 or 0)
+			|(fn(5+p) and 32 or 0)
+	end
+end
+function p8env.btn(...)
+	return _btn_help(btn,...)
+end
+function p8env.btnp(...)
+	return _btn_help(btnp,...)
+end
+
 p8env.assert=assert
 p8env.trace=debug.traceback
 p8env.stop=stop
 p8env.time=time
 p8env.t=time
-p8env.btn=btn
-p8env.btnp=btnp
 p8env.type=type
 p8env.select=select
 p8env.pack=pack
@@ -102,7 +120,7 @@ function p8env.printh(str, filename, overwrite, save_to_desktop)
 		if filename=="@clip" then
 			set_clipboard_text(str)
 		else
-			compat("printh extra args are not supported")
+			compat("printh() extra args are not supported")
 		end
 	else
 		printh(str)

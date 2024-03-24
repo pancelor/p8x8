@@ -1,12 +1,28 @@
---[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-20 02:22:31",revision=1042]]
+--[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-21 13:06:39",revision=1168]]
 printh"---"
-include "src/pq.lua"
+dev = true
+dev_include_lib = dev
+
+
+local function include_lib(name)
+	if dev_include_lib then
+		cp("/appdata/system/lib/"..name:basename(),name)
+	end
+	include(name)
+end
+
+include_lib "src/pq.lua"
 include "src/tool.lua"
 
 include "src/gui.lua"
 include "src/import.lua"
 include "src/warn.lua"
 include "src/export.lua"
+
+
+dev = true
+dev_export_filename = dev and "/desktop/temp.p64"
+
 
 function _init()
 	reset_state() --set up the window
@@ -79,6 +95,7 @@ end)
 function reset_state()
 	cartdata = nil
 	gui_set_preview_image(nil)
+	export_path = nil
 
 	window{
 		width  = 140,
@@ -118,12 +135,19 @@ end)
 ---------------
 
 function action_export_p64()
-	real_intention="export_p64"
-	create_process("/system/apps/filenav.p64", {
-		path="/desktop",
-		intention="save_file_as",
-		window_attribs={workspace="current", autoclose=true},
-	})
+	if dev_export_filename then
+		export_p64(dev_export_filename)
+	else
+		-- TODO: default to export_path (string)
+		real_intention="export_p64"
+		create_process("/system/apps/filenav.p64", {
+			path="/desktop",
+			intention="save_file_as",
+			window_attribs={workspace="current", autoclose=true},
+		})
+	end
 end
+
+
 
 

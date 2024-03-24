@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 09:34:40",modified="2024-03-20 02:22:31",revision=199]]
+--[[pod_format="raw",created="2024-03-19 09:34:40",modified="2024-03-21 13:06:39",revision=320]]
 function compat(msg)
 	printh("COMPAT: "..msg)
 	-- comment this assert() out if you want to run despite compatibility issues:
@@ -43,9 +43,13 @@ end
 
 -- init/update/draw
 
+--vid(0) local winw,winh = 480,270
+vid(3) local winw,winh = 240,135
+p8x8camx,p8x8camy = 64-winw/2,64-winh/2
+camera(p8x8camx,p8x8camy)
+
 local first_draw=true
 function p8x8_draw()
-	local x,y = 480/2-128/2,270/2-128/2
 	if first_draw then
 		first_draw=false
 		fillp(20927.5)
@@ -53,11 +57,10 @@ function p8x8_draw()
 		fillp()
 		rectfill(x+116,y+129,x+134,y+127+8,14)
 		print("p8x8",x+118,y+130,0x17)
+		rectfill(x,y,x+127,y+127,0)
 	end
-	local a,b = camera(-x,-y)
 	clip(x,y,128,128)
 	p8env._draw()
-	camera(a,b)
 end
 
 if p8env._update then

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-21 09:14:17",modified="2024-03-21 09:17:39",revision=1]]
+--[[pod_format="raw",created="2024-03-21 12:39:17",modified="2024-03-21 13:06:39",revision=20]]
 -- pq-debugging, by @pancelor
 -- quotes all args and prints to host console
 -- usage:
@@ -8,10 +8,26 @@ function pq(...)
 	printh(s)
 	return s
 end
+p8env.pq=pq
 
 -- pq(), and also notify()
 function pqn(...)
 	notify(pq(...))
+end
+p8env.pqn=pqn
+
+-- quote a single thing
+-- like tostr() but for tables
+-- don't call this directly; call pq or qq instead
+local function quote(t, depth)
+	depth=depth or 4 --avoid inf loop
+	if type(t)~="table" or depth<=0 then return tostr(t) end
+
+	local s={}
+	for k,v in pairs(t) do
+		add(s,tostr(k).."="..quote(v,depth-1))
+	end
+	return "{"..table.concat(s,",").."}"
 end
 
 -- quotes all arguments into a string
@@ -25,17 +41,4 @@ function qq(...)
 	end
 	return table.concat(s," ")
 end
-
--- quote a single thing
--- like tostr() but for tables
--- don't call this directly; call pq or qq instead
-function quote(t, depth)
-	depth=depth or 4 --avoid inf loop
-	if type(t)~="table" or depth<=0 then return tostr(t) end
-
-	local s={}
-	for k,v in pairs(t) do
-		add(s,tostr(k).."="..quote(v,depth-1))
-	end
-	return "{"..table.concat(s,",").."}"
-end
+p8env.qq=qq

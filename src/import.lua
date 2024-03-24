@@ -1,5 +1,11 @@
---[[pod_format="raw",created="2024-03-19 02:49:51",modified="2024-03-20 02:22:31",revision=490]]
+--[[pod_format="raw",created="2024-03-19 02:49:51",modified="2024-03-21 13:06:39",revision=610]]
 function import_p8(path)
+	local ext = path:ext()
+	if ext != "p8" then
+		notify("must be a .p8 file")
+		return
+	end
+	export_path = sub(path,1,-#ext-2)..".p64"
 	cartdata=parse_p8(path)
 	gui_set_preview_image(cartdata.gfx)
 	check_code_warnings(cartdata.lua)
@@ -61,8 +67,7 @@ end
 function parse_p8_gff(filestr)
 	local hexdata = p8_section_extract(filestr,"__gff__")
 	if not hexdata then
-		notify("* error: no __gff__ section found")
-		return
+		return userdata("u8",256)
 	end
 	hexdata = hexdata:gsub("\n", "")
 	return userdata("u8",256,hexdata)
@@ -72,7 +77,9 @@ end
 function parse_p8_map(filestr)
 	local mapdata = p8_section_extract(filestr,"__map__")
 	if not mapdata then
-		notify("* error: no __map__ section found")
+		printh("parse_p8_map: no __map__ section found")
+		-- TODO techincally this is returning too early b/c map could be only on bottom half
+		-- but no thanks, the code complexity is not worth it. that just wont work in this tool
 		return
 	end
 	mapdata = mapdata:gsub("\n", "")

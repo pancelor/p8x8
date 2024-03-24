@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-20 02:22:31",revision=920]]
+--[[pod_format="raw",created="2024-03-17 10:40:12",modified="2024-03-21 13:06:39",revision=1033]]
 local footh = 21 --size of gray footer area
 local preview_img
 function generate_gui( w,h)

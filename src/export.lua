@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 21:22:22",modified="2024-03-20 02:22:31",revision=205]]
+--[[pod_format="raw",created="2024-03-19 21:22:22",modified="2024-03-21 13:06:39",revision=341]]
 function export_p64(path)
 	if not cartdata then
 		notify("* error: must import a .p8 first")
@@ -14,13 +14,14 @@ function export_p64(path)
 		return
 	end
 	if fstat(path) then
-		notify("* error: must export a new file, cannot overwrite one")
-		return
+		-- overwriting, make a backup
+		mkdir "/tmp"
+		mv(path,"/tmp/"..path:basename())
 	end
 
 	-- ensure no trailing slash
 	path = rstrip(path,"/")
-
+	
 	mkdir(path)
 	mkdir(path.."/gfx")
 	mkdir(path.."/map")
@@ -60,7 +61,7 @@ end
 
 function export_map(path)
 	if not cartdata or not cartdata.map then
-		notify("* error: no map data")
+		printh("export_map: no map data")
 		return
 	end
 	assert(path,"no filename?")
@@ -95,6 +96,7 @@ function export_gfxfull(path)
 	end
 	
 	local sprites = {}
+	-- NOTE: "1" here is synced with sspr polyfill (draw.lua)
 	sprites[1] = {
 		bmp = cartdata.gfx,
 		flags = 0,

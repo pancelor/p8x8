@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-19 04:26:19",modified="2024-03-20 02:22:31",revision=327]]
+--[[pod_format="raw",created="2024-03-19 04:26:19",modified="2024-03-21 13:06:39",revision=417]]
 function test(want,got)
 	if want!=got then
 		assert(false,string.format("want: %s, got: %s.",tostr(want),tostr(got)))
