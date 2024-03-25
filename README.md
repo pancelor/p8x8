@@ -16,7 +16,7 @@ The goal here is NOT perfect emulation of pico8 -- instead, the tool attempts to
 - drag mygame.p8 from your picotron desktop
 	- to get a game from your host OS into picotron, type `folder` in the terminal and copy the file using your host OS
 - press the export button
-	- this will probably generate warnings; `load mygame.p64` to view the warnings in detail
+	- this will probably generate warnings; a notepad will open showing you the warnings. Manually change your p8 file, reimport and export until there are no warnings when exported
 - double-click the exported cart to run it
 
 ## compatibility
@@ -41,7 +41,7 @@ Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 
 - [ ] tline emulation -- see [baked/polyfill/draw.lua](./baked/polyfill/draw.lua#L17)
 
 ## TODO
-- [ ] show lint errors easier
+- [x] show lint errors easier
 - [ ] set better scope expectations. how much emulation accuracy are we shooting for (not much)
 - [ ] make CONTRIBUTORS.md
 - [ ] put list of chars that need replacing in docs somewhere, for easy searching: `[█▒🐱⬇️░✽●♥☉웃⌂⬅️😐♪🅾️◆…➡️★⧗⬆️ˇ∧❎▤▥あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんっゃゅょアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンッャュョ◜◝]`

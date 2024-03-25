@@ -58,9 +58,10 @@ function export_p64(path)
 		add(meta.workspaces, {location = fname, workspace_index=1})
 	end	
 
-	if 	cartdata.lua_warn then
+	if cartdata.lua_warn then
 		store(path.."/warning.txt",cartdata.lua_warn)
 		add(meta.workspaces, {location = "warning.txt", workspace_index=1})
+		create_process("/system/util/open.lua", {argv = {path.."/warning.txt"}})
 	end
 	
 	store_metadata(path,meta)	
