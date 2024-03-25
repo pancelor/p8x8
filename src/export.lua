@@ -50,8 +50,8 @@ function export_p64(path)
 	local meta = {}
 	meta.workspaces = {}
 	add(meta.workspaces, {location = "map/0.map", workspace_index=3})
-	add(meta.workspaces, {location = "gfx/0.gfx", workspace_index=2})
 	add(meta.workspaces, {location = "gfx/full.gfx", workspace_index=2})
+	add(meta.workspaces, {location = "gfx/0.gfx", workspace_index=2}) --after full.gfx so it's focused by default
 	add(meta.workspaces, {location = "main.lua", workspace_index=1})
 	for ti=1,#cartdata.lua do
 		local fname = string.format("p8code/%d.lua#1",ti-1)
@@ -64,7 +64,7 @@ function export_p64(path)
 		create_process("/system/util/open.lua", {argv = {path.."/warning.txt"}})
 	end
 	
-	store_metadata(path,meta)	
+	store_metadata(path,meta)
 	notify("exported "..path)
 end
 

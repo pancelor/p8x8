@@ -63,7 +63,7 @@ if false then
 	--		rectfill(x,y,x+127,y+127,0)
 		end
 		set_draw_target(p8canvas)
-		p8env._draw()
+		if p8env._draw then p8env._draw() end
 		set_draw_target()
 		blit(p8canvas,get_draw_target(),0,0,x,y)
 --[[
@@ -87,7 +87,7 @@ else
 	on_event("lost_focus", function() has_focus = false end) --comment out for global controls (multiple games at once!)
 	function p8x8_draw()
 		-- can't set directly b/c cart might overwrite it
-		p8env._draw()
+		if p8env._draw then p8env._draw() end
 	end
 end
 
@@ -125,7 +125,7 @@ else
 	_init=p8env._init
 	function _update()
 		-- can't set directly b/c cart might overwrite it
-		p8env._update60()
+		if p8env._update60 then p8env._update60() end
 	end
 	_draw=p8x8_draw
 end

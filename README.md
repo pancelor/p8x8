@@ -24,6 +24,7 @@ The goal here is NOT perfect emulation of pico8 -- instead, the tool attempts to
 not everything will work. This is meant as a starting point, requiring manual changes after converting. Two major areas that are unsupported:
 1. memory (e.g. peek/poke/memcpy) is not emulated. The calls will still go through to Picotron's memory, but the effects will be different
 2. numbers -- Picotron uses a 64-bit float numeric type, while PICO-8 uses 16.16 fixed-point numbers. Anything relying on PICO-8's numeric type will probably have problems
+3. custom fonts don't seem to work, I suspect the data format may be different?
 
 ## how does it work
 
