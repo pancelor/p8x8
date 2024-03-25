@@ -76,12 +76,20 @@ p8env.pget=pget
 p8env.pset=pset
 p8env.rect=rect
 p8env.rectfill=rectfill
-p8env.flip=flip -- TODO: needs to be doubled at 30fps
+
+function p8env.flip()
+	if p8env._update then
+		flip() -- double at 30fps
+	end
+	flip()
+end
 
 -- NOTE: sspr() uses _gfx_all, spr() uses _gfx_sheet (unless w/h are >1).
 -- this means if you edit your sprites in the picotron editor, you
--- need to edit both .gfx files. this is unfortunate! you could remove
--- _gfx_sheet entirely and only use _gfx_all
+-- need to edit both .gfx files. this is unfortunate! you should remove
+-- _gfx_sheet entirely and only use _gfx_all.
+-- note the individual sprites can be arbitrarily sized in picotron -- you
+-- can stuff a full 128x128 image into a single sprite if you want
 local _gfx_all,_gfx_sheet
 function reload_sprites()
 	_gfx_all = fetch("gfx/full.gfx")[1].bmp
@@ -126,13 +134,14 @@ end
 
 function p8env.fset(n, f, val)
 	if val==nil then
+		--fset(n,[f],val)
 		val,f=f,val
 	end
 	if f then
-		compat"todo: test fset f"
 		local mask=1<<f
-		fset(n,fget(n)&~mask|(val and mask or 0))
+		fset(n,(fget(n)&~mask) | (val and mask or 0))
 	else
+		val = (tonumber(val) or 0)&255 --I didn't test to see if this is necessary
 		fset(n,val)
 	end
 end

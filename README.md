@@ -41,10 +41,12 @@ Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 
 - [ ] tline emulation -- see [baked/polyfill/draw.lua](./baked/polyfill/draw.lua#L17)
 
 ## TODO
-- [ ] make CONTRIBUTORS.md
+- [ ] show lint errors easier
 - [ ] set better scope expectations. how much emulation accuracy are we shooting for (not much)
+- [ ] make CONTRIBUTORS.md
+- [ ] put list of chars that need replacing in docs somewhere, for easy searching: `[█▒🐱⬇️░✽●♥☉웃⌂⬅️😐♪🅾️◆…➡️★⧗⬆️ˇ∧❎▤▥あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんっゃゅょアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンッャュョ◜◝]`
 - [x] `#include` lint
-- [ ] `99do` lint
+- [x] `99do` lint
 - [ ] better UI
-- [ ] mouse emulation
-- [ ] auto filename, but overrideable? (save backup?)
+- [x] basic mouse support
+- [x] auto filename, but overrideable? backups are saved to `/ram/temp`

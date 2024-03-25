@@ -64,6 +64,10 @@ function lint_all(src)
 	_lint_literal(src,res,"//",[['//' is not a valid comment (change to '--'?)]])
 	_lint_pattern(src,res,"[^%w]goto[^%w]",[['goto' found; custom main loops are not supported]])
 	_lint_pattern(src,res,"\n%s*#include",[['#include' is not supported]])
+	_lint_pattern(src,res,"[%d]do[^%w]",[[numbers into keywords need a space in between]])
+	_lint_pattern(src,res,"[%d]then[^%w]",[[numbers into keywords need a space in between]])
+	_lint_pattern(src,res,"[%d]and[^%w]",[[numbers into keywords need a space in between]])
+	_lint_pattern(src,res,"[%d]or[^%w]",[[numbers into keywords need a space in between]])
 	lint_specials(src,res)
 	return res
 end

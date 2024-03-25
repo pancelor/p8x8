@@ -165,17 +165,25 @@ p8env.pack=pack
 p8env.unpack=unpack
 
 --https://www.lexaloffle.com/dl/docs/pico-8_manual.html#STAT
-local _stat_passthrough={
-	[0]=false, --memory (0..2048)
-	[1]=true, --cpu (total)
-	[2]=true, --cpu (sys) --will always report 0, but that's fine
-	[7]=true, --framerate
+local _stat_switch={
+	[1]=stat, --cpu (total)
+	[2]=stat, --cpu (sys) --will always report 0, but that's fine
+	[4]=get_clipboard,
+	[7]=stat, --framerate
+
+	--COMPAT: p8 requires a poke before mouse/keyboard will work, but we ignore that
+	[30]=function() return peektext()!=nil end,
+	[31]=function() return readtext(),0 end,
+	[32]=function() return select(1,mouse()) end, --mouse_x
+	[33]=function() return select(2,mouse()) end, --mouse_y
+	[34]=function() return select(3,mouse()) end, --mouse_b
+	[35]=function() return select(4,mouse()) end, --wheel_x
+	[36]=function() return select(5,mouse()) end, --wheel_y
 }
 function p8env.stat(id)
-	if _stat_passthrough[id] then
-		return stat(id)
-	elseif id==4 then
-		return get_clipboard()
+	local fn = _stat_switch[id]
+	if fn then
+		return fn(id)
 	else
 		compat(string.format("stat(%s) is not supported",tostr(id)))
 		return 0

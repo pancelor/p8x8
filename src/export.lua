@@ -16,7 +16,9 @@ function export_p64(path)
 	if fstat(path) then
 		-- overwriting, make a backup
 		mkdir "/ram/temp/"
-		mv(path,string.format("/ram/temp/p8x8-%s-%s",string.gsub(date(),"[^%w]",""),path:basename()))
+		local timestamp = split(date()," ",false)[2]
+		timestamp = string.gsub(timestamp,"[^%w]","")
+		mv(path,string.format("/ram/temp/p8x8-%s-%s",timestamp,path:basename()))
 	end
 
 	-- ensure no trailing slash
