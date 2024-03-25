@@ -1,13 +1,14 @@
 --[[pod_format="raw",created="2024-03-19 22:11:50",modified="2024-03-22 08:52:07",revision=282]]
 -- make maps pico8-like
 
---_map is a userdata("i16",128,64)
---  https://www.lexaloffle.com/dl/docs/picotron_userdata.html
-local _map 
+-- _map is a userdata("i16",128,64)
+--   https://www.lexaloffle.com/dl/docs/picotron_userdata.html
+local _map
 
 function load_map(path)
-	local map64 = _fetch_local(path) 
+	local map64 = fetch(path) 
 	if map64 then
+		memmap(0x100000, map64[1].bmp)
 		return map64[1].bmp --first layer
 	end
 end
@@ -27,12 +28,12 @@ end
 
 
 function p8env.mget(x,y)
-	return _map:get(x,y)&255
+	return (mget(x,y) or 0)&255
 end
 
 function p8env.mset(x,y,val)
 	-- &255: tested in p8 with: mset(0,0,700)?mget(0,0)
-	_map:set(x,y,val&255)
+	mset(x,y,val&255)
 end
 
 -- initial concept by Oli414: https://www.lexaloffle.com/bbs/?pid=143207#p
@@ -45,6 +46,10 @@ function p8env.map(celx,cely, sx,sy, celw,celh, flags)
 	celh = celh or 64
 	
 	-- TODO: speed: dont draw off-camera
+	-- local camx,camy = camera()
+	-- local x0,y0 = (camx-sx)\8,(camy-sy)\8 --?
+	-- camera(camx-sx,camy-sy)
+
 	local _mget = p8env.mget
 	if flags and flags!=0 then
 		for dy=0,celh-1 do
@@ -65,6 +70,7 @@ function p8env.map(celx,cely, sx,sy, celw,celh, flags)
 			end
 		end
 	end
+	-- camera(camx,camy)
 end
 p8env.mapdraw = p8env.map
 	

@@ -84,8 +84,8 @@ p8env.flip=flip -- TODO: needs to be doubled at 30fps
 -- _gfx_sheet entirely and only use _gfx_all
 local _gfx_all,_gfx_sheet
 function reload_sprites()
-	_gfx_all = _fetch_local("gfx/full.gfx")[1].bmp
-	_gfx_sheet = _fetch_local("gfx/0.gfx")
+	_gfx_all = fetch("gfx/full.gfx")[1].bmp
+	_gfx_sheet = fetch("gfx/0.gfx")
 end
 reload_sprites()
 function p8env.sset(x,y,val)

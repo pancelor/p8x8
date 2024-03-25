@@ -29,7 +29,7 @@ end
 function p8env.dget(slot)
 	if not _cartdata then return 0 end
 
-	local dat = _fetch_local("/appdata/".._cartdata.."/cartdata.pod")
+	local dat = fetch("/appdata/".._cartdata.."/cartdata.pod")
 	local w,h,typ,dim = dat:attribs()
 	assert(w==64 and h==1 and typ=="i32" and dim==1,qq(w,h,typ,dim))
 
@@ -48,7 +48,7 @@ end
 function p8env.dset(slot,val)
 	if not _cartdata then return end
 
-	local dat = _fetch_local("/appdata/".._cartdata.."/cartdata.pod")
+	local dat = fetch("/appdata/".._cartdata.."/cartdata.pod")
 	local w,h,typ,dim = dat:attribs()
 	assert(w==64 and h==1 and typ=="i32" and dim==1)
 

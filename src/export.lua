@@ -15,8 +15,8 @@ function export_p64(path)
 	end
 	if fstat(path) then
 		-- overwriting, make a backup
-		mkdir "/tmp"
-		mv(path,"/tmp/"..path:basename())
+		mkdir "/ram/temp/"
+		mv(path,string.format("/ram/temp/p8x8-%s-%s",string.gsub(date(),"[^%w]",""),path:basename()))
 	end
 
 	-- ensure no trailing slash
@@ -159,9 +159,7 @@ function export_baked(folder)
 	local p8x8_path = env().prog_name
 	if sub(p8x8_path,1,8)=="/system/" then -- e.g. running from terminal
 		local main = env().corun_program
-		local segs = split(main,"/")
-		deli(segs) -- pop filename
-		p8x8_path = table.concat(segs,"/")
+		p8x8_path = main:dirname()
 	end
 	local baked = p8x8_path.."/baked"
 	if not fstat(baked) then

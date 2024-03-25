@@ -75,7 +75,7 @@ if false then
 	end
 else
 	-- windowed
-	local title = _fetch_local("./window_title.txt")
+	local title = fetch("./window_title.txt")
 	window {
 		title = title,
 		width = 128,
