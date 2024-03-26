@@ -6,27 +6,19 @@ PICO-8 cartridge, using p8x8 by pancelor.
 
 
 ## CODE
-The code has been extracted, but it 8will not work
+The code has been extracted, but 8probably won't work
 out-of-the box! You must manually update it to
-work with PICOTRON's API. (There are some tips
-on things to look out for in the p8x8 release thread)
+work with PICOTRON's API. If p8x8 detected potential
+issues, it created a warning file for you to examine
 
-
-## MAP
-PICOTRON has no mget or mset. I encourage you to
-learn how to do things in the PICOTRON way -- you
-can have many sprites and maps loaded at once,
-with arbitary sizes!
+I encourage you to learn how to do things in the
+PICOTRON way -- you can have many sprites and maps
+loaded at once, with arbitary sizes!
 chttps://www.lexaloffle.com/picotron.php?page=faq
 
-But for a quick fix, here's a polyfill that should
-make maps more familiar to PICO-8 people:
-chttps://www.lexaloffle.com/bbs/?pid=143245#p
-
-
-## SFX? MUSIC?
-These are not (yet) converted.
-
+But this cart is a good way to get something up and
+running quickly. For more information, see
+chttps://github.com/pancelor/p8x8
 
 enjoy!
-k-pancelor
+-pancelor

@@ -164,6 +164,14 @@ p8env.select=select
 p8env.pack=pack
 p8env.unpack=unpack
 
+p8env.ls=ls
+p8env.dir=ls
+
+p8env.cocreate=cocreate
+p8env.coresume=coresume
+p8env.costatus=costatus
+p8env.yield=yield
+
 --https://www.lexaloffle.com/dl/docs/pico-8_manual.html#STAT
 local _stat_switch={
 	[1]=stat, --cpu (total)

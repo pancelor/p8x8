@@ -22,3 +22,4 @@ These areas will likely remain incompatible, and will require changes to get a c
 These areas will hopefully become compatible in the future. For now, they require changes to get a cart working in Picotron:
 
 - [custom fonts](https://github.com/pancelor/p8x8/issues/4) don't seem to work, I suspect the data format may be different?
+- top-level local variables are not visible across different tabs. this can be changed inside main.lua of p8x8's output, but it will lead to worse error messages. I recommend making top-level locals global instead.

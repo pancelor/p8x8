@@ -85,9 +85,13 @@ else
 		height = 128,
 		resizeable = false,
 	}
-	has_focus = true --used by btn/btnp
+
+	---[[ comment out for global controls (multiple games at once!)
+	on_event("lost_focus", function() has_focus = false end)
 	on_event("gained_focus", function() has_focus = true end)
-	on_event("lost_focus", function() has_focus = false end) --comment out for global controls (multiple games at once!)
+	--]]
+	has_focus = true --used by btn/btnp
+
 	function p8x8_draw()
 		-- can't set directly b/c cart might overwrite it
 		if p8env._draw then p8env._draw() end

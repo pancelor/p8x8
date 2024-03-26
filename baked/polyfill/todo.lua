@@ -2,15 +2,7 @@
 --[[
 the goal is to make major things work.
   but the goal is NOT to be a 1:1 pico8 emulator.
-  cart authors will need to hand-edit their converted picotron carts!
-extract functions from this list and put polyfills into ./baked/polyfill
-  the converted cart will load the polyfill automatically
-
-if you're writing a polyfill (for example, memset+memcpy+poke etc),
-  define function p8env.memset() etc
-write comments about compatibility like this: "--COMPAT: x is not supported"
-  or run code to tell the user directly:
-  "compat('x is not supported') return fallback"
+  cart authors will need to hand-edit their converted picotron carts.
 ]]
 
 local function planned(name, basic)
@@ -25,25 +17,19 @@ local function planned(name, basic)
 	end
 end
 
-p8env.cocreate=planned"cocreate"
-p8env.coresume=planned"coresume"
-p8env.costatus=planned"costatus"
-p8env.yield=planned"yield"
-
 p8env.run=planned("run",true)
-p8env.ls=planned"ls"
 p8env.extcmd=planned("extcmd",true)
 
 
+
+-- do not port these
+-- cart authors must manually decide how to implement what they want inside picotron
 
 local function rejected(name)
 	return function()
 		compat(name.." is not supported by p8x8")
 	end
 end
-
--- do not port these
--- cart authors must manually deal with them
 
 p8env.serial=rejected"serial"
 p8env.load=rejected"load"
