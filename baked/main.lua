@@ -1,18 +1,16 @@
 --[[pod_format="raw",created="2024-03-19 09:34:40",modified="2024-03-22 14:26:42",revision=580]]
 function compat(msg)
+	-- this function runs every time the translation layer notices possible compatibility issues
+	-- currently, it prints to the host console, but you could do something else here if you want
 	printh("COMPAT: "..msg)
-	-- comment this assert() out if you want to run despite compatibility issues:
+--	notify(msg)
 --	assert(false,msg)
 end
 
--- COMPAT: you can only draw inside _draw
--- COMPAT: numeric types are completely different
--- COMPAT: p8scii is not supported
+--swap fonts (see /system/lib/head.lua)
+poke(0x5f56, 0x56) -- primary font - p8.font
+poke(0x5f57, 0x40) -- secondary font - lil.font
 
--- handled by warnings:
--- COMPAT: 3//2 is now floor division, not a comment
--- COMPAT: carts with custom mainloops (goto) are not supported. they'll probably crash
-	
 p8env = {
 	p64env=_ENV, --upgrade path to picotron api
 }
@@ -22,7 +20,12 @@ for name in all(ls("./polyfill")) do
 	include("./polyfill/"..name)
 end
 
--- load tabs from p8code
+-- load tabs from p8code. the tabs are loaded one at a time, which
+--   gets you nice error messages (e.g. "tab3.lua:82"). however,
+--   you cannot access local variables from other tabs this way.
+-- you should either not use top-level locals, or rewrite the following
+--   code to concatenate the tabs together and then load them in a single
+--   call, with `load(table.concat(all_tabs,"\n"), "", "t", p8env)`
 for name in all(ls("./p8code")) do
 	local filename = fullpath("./p8code/"..name)
 	local src = fetch(filename)

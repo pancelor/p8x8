@@ -1,9 +1,12 @@
 --[[pod_format="raw",created="2024-03-19 23:27:45",modified="2024-03-22 13:58:18",revision=468]]
---swap fonts (see /system/lib/head.lua)
-poke(0x5f56, 0x56) -- primary font
-poke(0x5f57, 0x40) -- secondary font
+--COMPAT: p8scii is not supported. other differences?
+function p8env.print(...)
+	if select("#",...)==2 then
+		compat("print(msg,col) is not supported")
+	end
+	return print(...)
+end
 
-p8env.print=print --COMPAT: p8scii is not supported. other differences?
 p8env.pal=pal --COMPAT: not quite the same. might need some checks for pal({},1) etc
 function p8env.palt(...)
 	if select("#",...)==0 then
@@ -63,12 +66,18 @@ end
 --]]
 p8env.cls=cls
 
+-- COMPAT: color no longer returns old value, and
+-- @0x5f25 doesn't find the pen color. I'm not sure how to access it
+p8env.color=color
+
+-- COMPAT: cursor no longer returns the old values, and
+-- @0x5f26/@0x5f27 returns 0. I'm not sure how to access it
+p8env.cursor=cursor
+
 p8env.fillp=fillp
 p8env.circ=circ
 p8env.circfill=circfill
 p8env.clip=clip
-p8env.color=color
-p8env.cursor=cursor
 p8env.line=line
 p8env.oval=oval
 p8env.ovalfill=ovalfill
