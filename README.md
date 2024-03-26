@@ -10,13 +10,18 @@ Drag a p8 cart in, export a p64 cart, make some minor edits to the code, and voi
 
 The goal here is NOT perfect emulation of pico8 -- instead, the tool attempts to convert things well enough, and expects the user to make manual tweaks afterwards.
 
+## photosensitivity warning
+
+carts may flash rapidly, particularly 30fps carts that fade-out using a flip()-loop. use at your own risk, and test your converted carts before distributing them.
+
 ## quickstart
 
 - inside picotron, `load p8x8` then ctrl-r to run
 - drag mygame.p8 from your picotron desktop
 	- to get a game from your host OS into picotron, type `folder` in the terminal and copy the file using your host OS
 - press the export button
-	- this will probably generate warnings; a notepad will open showing you the warnings. Manually change your p8 file, reimport and export until there are no warnings when exported
+	- this will probably generate warnings; a notepad will open showing you the warnings. Manually change your p8 file, reimport and export
+	- the warning system is not too smart, so it might report warnings for things you've already fixed, or for things that aren't a problem (like code inside comments)
 - double-click the exported cart to run it
 
 ## compatibility
@@ -32,6 +37,12 @@ For more notes, see [compat.md](./compat.md)
 PICO-8 carts expect various things to be in the global environment, things like `spr`, `mget`, etc. Some of these exist in Picotron's global environment, but many are slightly different, and some are missing altogether. (Picotron does many things differently from PICO-8, so there's no reason to expect everything would stay exactly the same)
 
 The goal of this tool is to let you run carts written in "pico8 lua" inside of Picotron. This is achieved by sandboxing the pico8 code, and giving it a specially crafted global environment that has all of the standard functions it expects.
+
+## Picotron API
+
+This converter is a great if you want to get a cart working in Picotron quickly. If you plan to continue working on your cart, you should consider ignoring this tool, learning the [Picotron API](https://www.lexaloffle.com/picotron.php?page=faq), and porting your cart directly. (The code in the [polyfills folder](./baked/polyfill) might help you learn some of the differences)
+
+However, if you need access to the Picotron API from inside your PICO-8 code, it's available under the `p64env` table. For example, `fetch` is nil, because the PICO-8 code is sandboxed in a separate environment, but `p64env.fetch` will give you access to Picotron's `fetch` function.
 
 ## License
 

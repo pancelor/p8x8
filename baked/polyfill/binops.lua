@@ -35,7 +35,7 @@ function shr(x,n)
 	return x>>n
 end
 
--- TODO
+-- these operators don't exist (yet?)
 
 --function lshr(x,n)
 --	if (type(x) != "number") x = 0

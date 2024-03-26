@@ -86,12 +86,15 @@ p8env.pset=pset
 p8env.rect=rect
 p8env.rectfill=rectfill
 
+p8env.flip=flip -- single flip is correct
+--[[
 function p8env.flip()
 	if p8env._update then
 		flip() -- double at 30fps
 	end
 	flip()
 end
+--]]
 
 -- NOTE: sspr() uses _gfx_all, spr() uses _gfx_sheet (unless w/h are >1).
 -- this means if you edit your sprites in the picotron editor, you
