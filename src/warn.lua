@@ -15,7 +15,7 @@ function process_code(cart)
 	end
 	if #warns>0 then
 		cart.lua_warn = table.concat(warns,"\n")
-		notify(string.format("(%d more) %s",#warns,warns[1]))
+		notify_printh(string.format("(%d more) %s",#warns,warns[1]))
 	end
 end
 

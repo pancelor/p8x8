@@ -1,7 +1,7 @@
 --[[pod_format="raw",created="2024-03-19 21:22:22",modified="2024-03-22 14:26:42",revision=583]]
 function export_p64(path)
 	if not active_cart then
-		notify("* error: must import a .p8 first")
+		notify_printh "*error: must import a .p8 first"
 		return
 	end
 	assert(path,"no filename?")
@@ -10,7 +10,7 @@ function export_p64(path)
 		path ..= ".p64"
 	end
 	if path:ext() != "p64" then
-		notify("* error: must export as a .p64")
+		notify_printh "*error: must export as a .p64"
 		return
 	end
 	if fstat(path) then
@@ -65,7 +65,7 @@ function export_p64(path)
 	end
 	
 	store_metadata(path,meta)
-	notify("exported "..path)
+	notify_printh("exported "..path)
 end
 
 function export_map(path)
@@ -88,7 +88,7 @@ function export_map(path)
 		},
 	}
 	store(path, mapdat) --save
-	notify("exported "..path)
+	notify_printh("exported "..path)
 	-- open gfx editor
 --	create_process("/system/util/open.lua",
 --		{
@@ -100,7 +100,7 @@ end
 
 function export_gfxfull(path)
 	if not active_cart or not active_cart.gfx then
-		notify("* error: no image data")
+		notify_printh "*error: no image data"
 		return
 	end
 	
@@ -114,12 +114,12 @@ function export_gfxfull(path)
 		pan_y = 0,
 	}
 	store(path, sprites) --save
-	notify("exported "..path)
+	notify_printh("exported "..path)
 end
 
 function export_gfx(path)
 	if not active_cart or not active_cart.gfx then
-		notify("* error: no image data")
+		notify_printh "*error: no image data"
 		return
 	end
 	assert(path,"no filename?")
@@ -146,7 +146,7 @@ function export_gfx(path)
 		end
 	end
 	store(path, sprites) --save
-	notify("exported "..path)
+	notify_printh("exported "..path)
 	-- open gfx editor
 --	create_process("/system/util/open.lua",
 --		{
@@ -166,8 +166,7 @@ function export_baked(folder)
 	end
 	local baked = p8x8_path.."/baked"
 	if not fstat(baked) then
-		printh("could not find baked folder: "..baked)
-		notify("missing baked/, continuing...")
+		notify_printh("could not find baked/: "..baked)
 		return
 	end
 	cpr(baked,folder)
