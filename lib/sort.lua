@@ -1,7 +1,7 @@
 --[[pod_format="raw",created="2024-03-22 13:13:47",modified="2024-03-22 14:03:09",revision=12]]
 -- shellsort; beefy insertion sort
-local shell_gaps = {57,23,10,4,1}
--- local shell_gaps = {701,301,132,57,23,10,4,1}
+-- local shell_gaps = {57,23,10,4,1}
+local shell_gaps = {701,301,132,57,23,10,4,1}
 function sort_shell(arr)
 	for gap in all(shell_gaps) do
 		for i=gap+1,#arr do
