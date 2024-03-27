@@ -97,7 +97,7 @@ function reset_state()
 
 	window{
 		width  = 140,
-		height = 120,
+		height = 104,
 		title  = "p8x8 converter",
 		autoclose = true, -- esc=quit
 	}

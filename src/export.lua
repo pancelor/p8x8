@@ -33,30 +33,25 @@ function export_p64(path)
 
 	export_baked(path)
 
-	export_gfx(path.."/gfx/0.gfx")
 	export_gfxfull(path.."/gfx/full.gfx")
+	export_gfx(path.."/gfx/0.gfx")
 	export_map(path.."/map/0.map")
-	-- export code tabs
-	for ti=1,#active_cart.lua do
-		local fname = string.format("%s/p8code/%d.lua",path,ti-1)
-		store(fname,active_cart.lua[ti])
-	end
-	
+	export_tabs(path.."/p8code")
+
 	-- store open file metadata
 	-- see /system/wm/wm.lua:save_open_locations_metadata or new.lua (bbs util)
-	-- TODO maybe export into /ram/cart ? don't want to overwrite without warning tho..
-
-	--pq(fetch_metadata("/desktop/03mar/p8x8.p64"))
 	local meta = {}
 	meta.workspaces = {}
 	add(meta.workspaces, {location = "map/0.map", workspace_index=3})
 	add(meta.workspaces, {location = "gfx/full.gfx", workspace_index=2})
 	add(meta.workspaces, {location = "gfx/0.gfx", workspace_index=2}) --after full.gfx so it's focused by default
 	add(meta.workspaces, {location = "main.lua", workspace_index=1})
-	for ti=1,#active_cart.lua do
-		local fname = string.format("p8code/%d.lua#1",ti-1)
-		add(meta.workspaces, {location = fname, workspace_index=1})
-	end	
+	if active_cart.lua then
+		for ti=1,#active_cart.lua do
+			local fname = string.format("p8code/%d.lua#1",ti-1)
+			add(meta.workspaces, {location = fname, workspace_index=1})
+		end
+	end
 
 	if active_cart.lua_warn then
 		store(path.."/warning.txt",active_cart.lua_warn)
@@ -66,6 +61,18 @@ function export_p64(path)
 	
 	store_metadata(path,meta)
 	notify_printh("exported "..path)
+end
+
+function export_tabs(path)
+	if not active_cart or not active_cart.lua then
+		printh("export_tabs: no lua data")
+		return
+	end
+	-- export code tabs
+	for ti=1,#active_cart.lua do
+		local fname = string.format("%s/%d.lua",path,ti-1)
+		store(fname,active_cart.lua[ti])
+	end
 end
 
 function export_map(path)

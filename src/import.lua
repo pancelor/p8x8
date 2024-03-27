@@ -35,7 +35,7 @@ end
 function parse_p8_lua(filestr)
 	local luastr = p8_section_extract(filestr,"__lua__")
 	if not luastr then
-		notify_printh "*error: no __lua__ section found"
+		printh "missing section: __lua__"
 		return
 	end
 	local tabs = {}
@@ -67,7 +67,7 @@ function parse_p8_gfx(filestr)
 	-- https://www.lexaloffle.com/bbs/?pid=143596#p
 	local hexdata = p8_section_extract(filestr,"__gfx__")
 	if not hexdata then
-		notify_printh "*error: no __gfx__ section found"
+		printh "missing section: __gfx__"
 		return
 	end
 	hexdata = hexdata:gsub("\n", "")
@@ -90,7 +90,7 @@ end
 function parse_p8_map(filestr)
 	local mapdata = p8_section_extract(filestr,"__map__")
 	if not mapdata then
-		printh("parse_p8_map: no __map__ section found")
+		printh "missing section: __map__"
 		-- TODO techincally this is returning too early b/c map could be only on bottom half
 		-- but no thanks, the code complexity is not worth it. that just wont work in this tool
 		return
@@ -99,7 +99,7 @@ function parse_p8_map(filestr)
 
 	local gfxdata = p8_section_extract(filestr,"__gfx__")
 	if not gfxdata then
-		notify_printh "*error: no __gfx__ section found"
+		printh "(parse_p8_map) missing section: __gfx__"
 		return
 	end
 	gfxdata = split(gfxdata,"\n",false) -- NOTE: array of lines

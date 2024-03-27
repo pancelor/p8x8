@@ -1,6 +1,8 @@
 --[[pod_format="raw",created="2024-03-20 01:24:07",modified="2024-03-22 14:26:42",revision=490]]
 function process_code(cart)
 	local tabs = cart.lua
+	if not tabs then return end
+
 	local warns = {}
 	local global_lno = 3
 	for ti=1,#tabs do
@@ -23,7 +25,7 @@ function lineno_build(src)
 	local book = {}
 	local ri = 1
 	for i=1,10000 do --sentinel
-		local ni = src:find("\n",ri)
+		local ni = string.find(src,"\n",ri,true)
 		if not ni then
 			break
 		end
@@ -45,7 +47,7 @@ end
 local function _lint_find(src,res,substr,plain,msg)
 	local ri=1
 	for i=1,100 do
-		local i0,i1 = src:find(substr,ri,plain)
+		local i0,i1 = string.find(src,substr,ri,plain)
 		if not i0 then
 			break
 		end
