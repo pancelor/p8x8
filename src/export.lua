@@ -1,6 +1,6 @@
 --[[pod_format="raw",created="2024-03-19 21:22:22",modified="2024-03-22 14:26:42",revision=583]]
 function export_p64(path)
-	if not cartdata then
+	if not active_cart then
 		notify("* error: must import a .p8 first")
 		return
 	end
@@ -37,9 +37,9 @@ function export_p64(path)
 	export_gfxfull(path.."/gfx/full.gfx")
 	export_map(path.."/map/0.map")
 	-- export code tabs
-	for ti=1,#cartdata.lua do
+	for ti=1,#active_cart.lua do
 		local fname = string.format("%s/p8code/%d.lua",path,ti-1)
-		store(fname,cartdata.lua[ti])
+		store(fname,active_cart.lua[ti])
 	end
 	
 	-- store open file metadata
@@ -53,13 +53,13 @@ function export_p64(path)
 	add(meta.workspaces, {location = "gfx/full.gfx", workspace_index=2})
 	add(meta.workspaces, {location = "gfx/0.gfx", workspace_index=2}) --after full.gfx so it's focused by default
 	add(meta.workspaces, {location = "main.lua", workspace_index=1})
-	for ti=1,#cartdata.lua do
+	for ti=1,#active_cart.lua do
 		local fname = string.format("p8code/%d.lua#1",ti-1)
 		add(meta.workspaces, {location = fname, workspace_index=1})
 	end	
 
-	if cartdata.lua_warn then
-		store(path.."/warning.txt",cartdata.lua_warn)
+	if active_cart.lua_warn then
+		store(path.."/warning.txt",active_cart.lua_warn)
 		add(meta.workspaces, {location = "warning.txt", workspace_index=1})
 		create_process("/system/util/open.lua", {argv = {path.."/warning.txt"}})
 	end
@@ -69,7 +69,7 @@ function export_p64(path)
 end
 
 function export_map(path)
-	if not cartdata or not cartdata.map then
+	if not active_cart or not active_cart.map then
 		printh("export_map: no map data")
 		return
 	end
@@ -78,7 +78,7 @@ function export_map(path)
 	-- view expected structure with: podtree /ram/cart/map/0.map
 	local mapdat = {
 		{ -- first map layer
-			bmp = cartdata.map,
+			bmp = active_cart.map,
 			tile_w = 8,
 			tile_h = 8,
 			-- start view in top-left
@@ -99,7 +99,7 @@ function export_map(path)
 end
 
 function export_gfxfull(path)
-	if not cartdata or not cartdata.gfx then
+	if not active_cart or not active_cart.gfx then
 		notify("* error: no image data")
 		return
 	end
@@ -107,7 +107,7 @@ function export_gfxfull(path)
 	local sprites = {}
 	-- NOTE: "1" here is synced with sspr polyfill (draw.lua)
 	sprites[1] = {
-		bmp = cartdata.gfx,
+		bmp = active_cart.gfx,
 		flags = 0,
 		zoom = 1,
 		pan_x = 0,
@@ -118,14 +118,14 @@ function export_gfxfull(path)
 end
 
 function export_gfx(path)
-	if not cartdata or not cartdata.gfx then
+	if not active_cart or not active_cart.gfx then
 		notify("* error: no image data")
 		return
 	end
 	assert(path,"no filename?")
 	
-	local gfx = cartdata.gfx
-	local gff = cartdata and cartdata.gff
+	local gfx = active_cart.gfx
+	local gff = active_cart and active_cart.gff
 	local iw,ih = gfx:attribs()
 
 	local sprites = {}

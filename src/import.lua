@@ -2,13 +2,14 @@
 function import_p8(path)
 	local ext = path:ext()
 	if ext != "p8" then
-		notify("must be a .p8 file")
+		notify_printh(string.format("*error: want a '.p8' file, got '.%s'",ext))
 		return
 	end
+	notify_printh "importing..."
 	export_path = sub(path,1,-#ext-2)..".p64"
-	cartdata=parse_p8(path)
-	gui_set_preview_image(cartdata.gfx)
-	process_code(cartdata)
+	active_cart=parse_p8(path)
+	gui_set_preview_image(active_cart.gfx)
+	process_code(active_cart)
 end
 
 
@@ -16,6 +17,7 @@ end
 function parse_p8(path)
 	local filestr = fetch(path)
 	assert(filestr)
+	filestr = filestr:gsub("\r\n","\n") -- normalize line endings
 	
 	local cart={}
 	cart.lua=parse_p8_lua(filestr)
@@ -33,7 +35,7 @@ end
 function parse_p8_lua(filestr)
 	local luastr = p8_section_extract(filestr,"__lua__")
 	if not luastr then
-		notify("* error: no __lua__ section found")
+		notify_printh "*error: no __lua__ section found"
 		return
 	end
 	local tabs = {}
@@ -65,7 +67,7 @@ function parse_p8_gfx(filestr)
 	-- https://www.lexaloffle.com/bbs/?pid=143596#p
 	local hexdata = p8_section_extract(filestr,"__gfx__")
 	if not hexdata then
-		notify("* error: no __gfx__ section found")
+		notify_printh "*error: no __gfx__ section found"
 		return
 	end
 	hexdata = hexdata:gsub("\n", "")
@@ -97,7 +99,7 @@ function parse_p8_map(filestr)
 
 	local gfxdata = p8_section_extract(filestr,"__gfx__")
 	if not gfxdata then
-		notify("* error: no __gfx__ section found")
+		notify_printh "*error: no __gfx__ section found"
 		return
 	end
 	gfxdata = split(gfxdata,"\n",false) -- NOTE: array of lines
@@ -146,7 +148,7 @@ end
 -- returns indices for use with str:sub()
 -- usage: local gfx = filestr:sub(p8_section_find(filestr,"__gfx__"))
 function p8_section_find(filestr,header)
-	local a0,a1 = string.find(filestr,header.."\n") -- TODO CRLF?
+	local a0,a1 = string.find(filestr,header.."\n")
 	if not a0 then
 		return
 	end

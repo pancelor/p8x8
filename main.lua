@@ -91,7 +91,7 @@ end)
 
 
 function reset_state()
-	cartdata = nil
+	active_cart = nil
 	gui_set_preview_image(nil)
 	export_path = nil
 
@@ -99,6 +99,7 @@ function reset_state()
 		width  = 140,
 		height = 120,
 		title  = "p8x8 converter",
+		autoclose = true, -- esc=quit
 	}
 	generate_gui()
 end
@@ -114,10 +115,10 @@ on_event("drop_items",function(msg)
 					import_p8(item.fullpath)
 					return
 				else
-					err = string.format("* error: want a '.p8' file, got '%s'",ext)
+					err = string.format("*error: want a '.p8' file, got '%s'",ext)
 				end
 			else
-				err = "* error: want a '.p8' file, got a folder"
+				err = "*error: want a '.p8' file, got a folder"
 			end
 		end
 	end

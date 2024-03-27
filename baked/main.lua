@@ -2,7 +2,8 @@
 function compat(msg)
 	-- this function runs every time the translation layer notices possible compatibility issues
 	-- currently, it prints to the host console, but you could do something else here if you want
-	printh("COMPAT: "..msg)
+	msg = "COMPAT: "..msg
+	printh(msg)
 --	notify(msg)
 --	assert(false,msg)
 end
@@ -84,6 +85,7 @@ else
 		width = 128,
 		height = 128,
 		resizeable = false,
+		autoclose = true, -- esc=quit
 	}
 
 	---[[ comment out for global controls (multiple games at once!)

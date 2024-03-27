@@ -53,4 +53,10 @@ end
 --test("abc",rstrip("abc","x"))
 --test("",rstrip("abc","cab"))
 
-
+-- like pqn(), but meant for long-term logging,
+--   not short-term debugging. not too fancy,
+--   just call both
+function notify_printh(msg)
+	printh(msg)
+	notify(msg)
+end

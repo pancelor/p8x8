@@ -87,7 +87,7 @@ p8env.next=next
 function p8env.inext(a,i)
 	i = (i or 0)+1
 	local v = a[i]
-	if v then
+	if v!=nil then
 		return i, v
 	end
 end
