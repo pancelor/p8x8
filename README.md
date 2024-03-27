@@ -23,6 +23,7 @@ Carts may flash rapidly, particularly 30fps carts that fade-out using a flip()-l
 	- this will probably generate warnings; a notepad will open showing you the warnings. Manually change your p8 file, reimport and export
 	- the warning system is not too smart, so it might report warnings for things you've already fixed, or for things that aren't a problem (like code inside comments)
 - Double-click the exported cart to run it
+- `load my-exported-cart.p64` and check out `main.lua` for more info. There's an option in there to run the game at fullscreen with a border image!
 
 ## compatibility
 

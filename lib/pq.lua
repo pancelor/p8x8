@@ -3,10 +3,10 @@
 -- quotes all args and prints to host console
 -- usage:
 --   pq("handles nils", many_vars, {tables=1, work=11, too=111})
+--   rectfill(pq(x,y,x+7,y+7,13))
 function pq(...)
-	local s=qq(...)
-	printh(s)
-	return s
+	printh(qq(...))
+	return ...
 end
 
 -- pq(), and also notify()
@@ -14,7 +14,21 @@ function pqn(...)
 	local s=qq(...)
 	notify(s)
 	printh(s)
-	return s
+	return ...
+end
+
+-- quote a single thing
+-- like tostr() but for tables
+-- don't call this directly; call pq or qq instead
+local function quote(t, depth)
+	depth=depth or 4 --avoid inf loop
+	if type(t)~="table" or depth<=0 then return tostr(t) end
+
+	local s={}
+	for k,v in pairs(t) do
+		add(s,tostr(k).."="..quote(v,depth-1))
+	end
+	return "{"..table.concat(s,",").."}"
 end
 
 -- quotes all arguments into a string
@@ -27,18 +41,4 @@ function qq(...)
 		add(s,quote(arg))
 	end
 	return table.concat(s," ")
-end
-
--- quote a single thing
--- like tostr() but for tables
--- don't call this directly; call pq or qq instead
-function quote(t, depth)
-	depth=depth or 4 --avoid inf loop
-	if type(t)~="table" or depth<=0 then return tostr(t) end
-
-	local s={}
-	for k,v in pairs(t) do
-		add(s,tostr(k).."="..quote(v,depth-1))
-	end
-	return "{"..table.concat(s,",").."}"
 end

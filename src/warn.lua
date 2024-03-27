@@ -1,7 +1,8 @@
 --[[pod_format="raw",created="2024-03-20 01:24:07",modified="2024-03-22 14:26:42",revision=490]]
+-- returns success
 function process_code(cart)
 	local tabs = cart.lua
-	if not tabs then return end
+	if not tabs then return true end
 
 	local warns = {major={},minor={}} -- major = cart will not run   minor = cart needs adjustments
 	local global_lno = 3 --skip p8 header
@@ -25,6 +26,7 @@ function process_code(cart)
 		cart.lua_warn = table.concat(warns.minor,"\n")
 		notify_printh(string.format("(%d more) %s",#warns.minor,warns.minor[1]))
 	end
+	return true
 end
 
 function lineno_build(src)

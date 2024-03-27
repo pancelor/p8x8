@@ -44,38 +44,42 @@ for name in all(ls("./p8code")) do
 end
 
 
+-- to run fullscreen with a border, change to true.
+-- to draw a border image, use this tool to create a new
+--   spritesheet saved at gfx/border.gfx,
+--   where sprite 0 is a 480x270 sprite:
+--   https://www.lexaloffle.com/bbs/?pid=importpng#p
+local fullscreen = false
+
 
 -- init/update/draw
 local p8x8_draw
-if false then
-	-- fullscreen
+if fullscreen then
 	local p8canvas = userdata("u8",128,128)
-		
+	
 	vid(0)  local winw,winh = 480,270
 	--vid(3)  local winw,winh = 240,135 -- ok size but very bad flashing...
 	
-	local first_draw=true
+	-- x,y: top-left corner of the p8 screen
+	function draw_border(x,y)
+		draw_border = function() end -- only run once
+		local spr_border = fetch "gfx/border.gfx"
+		if spr_border then
+			spr(spr_border[0].bmp)
+		else
+			cls()
+			rectfill(x-8,y-8,x+127+8,y+127+8,1)
+			print("\#1p8x8",x+118,y+130,0x12)
+		end
+	end
+	
 	p8x8_draw = function()
 		local x,y = winw/2-64,winh/2-64
-		if first_draw then
-			first_draw=false
-			fillp(20927.5)
-			rectfill(x-8,y-8,x+127+8,y+127+8,14)
-			fillp()
-			rectfill(x+116,y+129,x+134,y+127+8,14)
-			print("p8x8",x+118,y+130,0x17)
-	--		rectfill(x,y,x+127,y+127,0)
-		end
+		draw_border(x,y)
 		set_draw_target(p8canvas)
 		if p8env._draw then p8env._draw() end
 		set_draw_target()
 		blit(p8canvas,get_draw_target(),0,0,x,y)
---[[
-		local a,b=camera()
-		palt(0,false)
-		spr(p8canvas,0,0)
-		camera(a,b)
---]]
 	end
 else
 	-- windowed
@@ -88,19 +92,19 @@ else
 		autoclose = true, -- esc=quit
 	}
 
-	---[[ comment out for global controls (multiple games at once!)
-	on_event("lost_focus", function() has_focus = false end)
-	on_event("gained_focus", function() has_focus = true end)
-	--]]
-	has_focus = true --used by btn/btnp
-
 	function p8x8_draw()
-		-- can't set directly b/c cart might overwrite it
+		-- can't set directly b/c cart might change _draw midgame
 		if p8env._draw then p8env._draw() end
 	end
 end
 
-saved_btnp=0 --used by p8env.btnp. to deal with 30fps
+---[[ comment out for global controls (multiple games at once!)
+on_event("lost_focus", function() has_focus = false end)
+on_event("gained_focus", function() has_focus = true end)
+--]]
+has_focus = true --used by p8env.btn/btnp
+
+saved_btnp=0 --used by p8env.btnp (to deal with 30fps)
 if p8env._update then
 	--30fps
 	--[[
@@ -133,7 +137,7 @@ if p8env._update then
 else
 	_init=p8env._init
 	function _update()
-		-- can't set directly b/c cart might overwrite it
+		-- can't set directly b/c cart might change _update60 midgame
 		if p8env._update60 then p8env._update60() end
 	end
 	_draw=p8x8_draw

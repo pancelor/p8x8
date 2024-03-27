@@ -9,7 +9,9 @@ function import_p8(path)
 	export_path = sub(path,1,-#ext-2)..".p64"
 	active_cart=parse_p8(path)
 	gui_set_preview_image(active_cart.gfx)
-	process_code(active_cart)
+	if process_code(active_cart) then
+		notify_printh "imported!"
+	end
 end
 
 

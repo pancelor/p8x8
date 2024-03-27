@@ -3,21 +3,19 @@
 -- quotes all args and prints to host console
 -- usage:
 --   pq("handles nils", many_vars, {tables=1, work=11, too=111})
+--   rectfill(pq(x,y,x+7,y+7,13))
 function pq(...)
-	local s=qq(...)
-	printh(s)
-	return s
+	printh(qq(...))
+	return ...
 end
-p8env.pq=pq
 
 -- pq(), and also notify()
 function pqn(...)
 	local s=qq(...)
 	notify(s)
 	printh(s)
-	return s
+	return ...
 end
-p8env.pqn=pqn
 
 -- quote a single thing
 -- like tostr() but for tables
@@ -44,4 +42,9 @@ function qq(...)
 	end
 	return table.concat(s," ")
 end
+
+-- [[
 p8env.qq=qq
+p8env.pq=pq
+p8env.pqn=pqn
+--]]
