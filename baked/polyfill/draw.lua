@@ -82,9 +82,18 @@ p8env.line=line
 p8env.oval=oval
 p8env.ovalfill=ovalfill
 p8env.pget=pget
-p8env.pset=pset
 p8env.rect=rect
 p8env.rectfill=rectfill
+p8env.pset=pset --COMPAT: negative colors may act strangely
+--[[ this version avoids some bugs, but I don't want to make pset slow
+function p8env.pset(x,y,...)
+	if select("#",...)>0 then
+		pset(x,y,select(1,...)%16) --negative colors act strangely, in picotron terminal at least
+	else
+		pset(x,y)
+	end
+end
+--]]
 
 p8env.flip=flip -- single flip is correct
 --[[

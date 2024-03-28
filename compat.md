@@ -1,26 +1,34 @@
 This project does not aim for perfect emulation of pico8. It aims to make it easier to quickly get a PICO-8 cart working in Picotron, but some assembly is required.
 
-When p8x8 builds a .p64 file for you, the main.lua inside the p64 cart has a function `compat` at the top. This is used by the p8x8 translation layer to signal when the code realizes it is running incompatible behavior. Currently your p64 will print out a warning to the host console whenever this happens, but you could change it to do something else here, like `assert` or `notify`.
+p8x8 will generate warnings at import time if it notices likely problems. See `function lint_all` in [warn.lua](https://github.com/pancelor/p8x8/blob/main/src/warn.lua#L74-L89) for details.
 
-For more in-depth compatibility notes, search for "COMPAT" inside the baked/polyfill folder -- these files set up the environment that the PICO-8 code sees as its global environment
+## compatibility differences
 
-Here are the current areas where p8x8 does not emulate pico8 perfectly:
+When p8x8 builds a .p64 file for you, the cart's `main.lua` file has a function `compat` at the top. This is called by the p8x8 sandbox/translation-layer (`p8env`) whenever p8x8 realizes it is running incompatible behavior. By default, `compat` will print these warnings to the host console, but you could change it to `assert` or `notify` in addition.
 
-## wontfix
+For more in-depth compatibility notes, search for "COMPAT" inside the [baked/polyfill](https://github.com/pancelor/p8x8/tree/main/baked/polyfill) folder. These files set up the "p8env" environment -- this is the sandbox that PICO-8 code sees as its global environment.
+
+Here's a list of the high-level areas where p8x8 does not emulate pico8 perfectly:
+
+### wontfix
 
 These areas will likely remain incompatible, and will require changes to get a cart working in Picotron:
 
+- special symbols (like pressing shift-X in PICO-8 to create ❎) are not supported
+	- p8x8 generates warnings every time it notices these special symbols, and the warnings suggest an easy upgrade path for the btn/fillp use case: `WARN(minor): 1.lua#102 (p8:234) special chars (shift-X / chr(151)) are not supported. use this, for example: fillp(p8x8_symbol"❎") instead of fillp(❎)`
+	- p8x8 doesn't know what your intent for the symbol is (is it a printed visual? is it a btn/fillp-like argument? is it part of encoded binary data) and it prefers not to guess, leaving the decision to the user who knows their code much better than p8x8 does anyway.
+- memory (e.g. peek/poke/memcpy) is not emulated. The calls will still go through to Picotron's memory, but the effects will be different
+- numbers -- Picotron uses 64-bit floats as numbers, but PICO-8 uses 16.16 fixed-point numbers. Anything relying on the exact format of PICO-8 numbers will probably have problems.
+	- binary operations like `&` will error if the number has decimals -- Picotron will say "number has no integer representation"
+- p8scii special commands are not supported, beyond whatever zep has done to make the APIs similar (color codes seem to work)
+- `x = 13//2` -- two slashes now means "floor division", not the start of a comment. In PICO-8, this would set x to 13, but in Picotron, x gets set to 6.
 - you can only draw inside the `_draw` function
 	- carts that use `goto` loops are not supported
-- memory (e.g. peek/poke/memcpy) is not emulated. The calls will still go through to Picotron's memory, but the effects will be different
-- numbers -- Picotron uses a 64-bit float numeric type, while PICO-8 uses 16.16 fixed-point numbers. Anything relying on the exact format of PICO-8 numbers will probably have problems.
-- p8scii special commands are not supported, beyond whatever zep has done to make the APIs similar (colors seem to work)
-- `x = 13//2` -- two slashes now means "floor division", not the start of a comment. In PICO-8, `x==13`, but in Picotron, `x==6`.
 
-## todo
+### todo
 
 These areas will hopefully become compatible in the future. For now, they require changes to get a cart working in Picotron:
 
 - [custom fonts](https://github.com/pancelor/p8x8/issues/4) don't seem to work, I suspect the data format may be different?
 - top-level local variables are not visible across different tabs. this can be changed inside main.lua of p8x8's output, but it will lead to worse error messages. I recommend making top-level locals global instead.
-- pausing the game is not supported. menuitems _are_ supported -- they show up in the window's menu
+- [pausing the game](https://github.com/pancelor/p8x8/issues/7) is not supported. (but menuitems are supported -- they show up in the window's menu)

@@ -74,12 +74,17 @@ end
 function lint_all(src)
 	local res = {}
 	_lint_literal(src,res,"minor","[^:]//",[['//' is not a valid comment (change to '--'?)]]) --avoid colons b/c of URL false-positives
-	-- _lint_pattern(src,res,"[^%w]goto[^%w]",[['goto' found; custom main loops are not supported]])
-	_lint_pattern(src,res,"minor","\n%s*#include",[['#include' is not supported]])
-	_lint_pattern(src,res,"minor","[%d]do[^%w]",[[numbers into keywords need a space in between]])
-	_lint_pattern(src,res,"minor","[%d]then[^%w]",[[numbers into keywords need a space in between]])
-	_lint_pattern(src,res,"minor","[%d]and[^%w]",[[numbers into keywords need a space in between]])
-	_lint_pattern(src,res,"minor","[%d]or[^%w]",[[numbers into keywords need a space in between]])
+
+	_lint_pattern(src,res,"minor","\n%s*#include",[['#include' is not supported -- re-export your cart from PICO-8 as a .p8.png and then back to .p8 to inline the includes`]])
+	-- you could instead write `p64env.include(filename)`,
+	--   but the nuances are complicated -- need to move that file manually to
+	--   the correct path, p8x8 won't generate warnings for that file, and I'm
+	--   not 100% sure whether `include`ing will stay within the p8env sandbox
+
+	_lint_pattern(src,res,"minor","[%d]do[^%w]",[[numbers into keywords need whitespace; e.g. "99do" => "99 do"]])
+	_lint_pattern(src,res,"minor","[%d]then[^%w]",[[numbers into keywords need whitespace; e.g. "99then" => "99 then"]])
+	_lint_pattern(src,res,"minor","[%d]and[^%w]",[[numbers into keywords need whitespace; e.g. "99and" => "99 and"]])
+	_lint_pattern(src,res,"minor","[%d]or[^%w]",[[numbers into keywords need whitespace; e.g. "99or" => "99 or"]])
 	_lint_pattern(src,res,"major","[^<>]>>>[^<>]",[[lshr (>>>) is not supported]])
 	_lint_pattern(src,res,"major","[^<>]<<>[^<>]",[[rotl (>>>) is not supported]])
 	_lint_pattern(src,res,"major","[^<>]>><[^<>]",[[rotr (>>>) is not supported]])
@@ -88,13 +93,13 @@ function lint_all(src)
 	return res
 end
 
---[[
+--[[ generate this table in PICO-8 with this code + manual cleanup (\\ and \" need editing)
 	s=""
 	for i=1,255 do
 		s..='"'..chr(i)..'", '
 		if i%16==15 then s..="\n" end
 	end
-	printh(s,"@clip") --\\ and \" need editing
+	printh(s,"@clip")
 ]]
 local p8scii = {
 		"¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "\t", "\n", "ᵇ", "ᶜ", "\r", "ᵉ", "ᶠ",
@@ -115,24 +120,18 @@ local p8scii = {
 	"ユ", "ヨ", "ラ", "リ", "ル", "レ", "ロ", "ワ", "ヲ", "ン", "ッ", "ャ", "ュ", "ョ", "◜", "◝",
 }
 function lint_symbols(src,res)
-	-- not perfect but good enough
-	-- for ch,val in pairs(_symbols) do
-	-- 	local letter=val-127 -- 1-26
-	-- 	if letter<=26 then
-	-- 	end
-	-- end
-
 	for ix,ch in ipairs(p8scii) do
 		if (32<=ix and ix<=126) or ix==9 or ix==10 or ix==13 then
 			-- no problem, move on
 		elseif 128<=ix and ix<=127+26 then
 			-- shift-letter
-			local example = chr(0x82)
-			_lint_literal(src,res,"minor",ch,string.format("special chars (shift-%s) are not supported. use this, for example: btn(p8x8_symbol\"%s\") instead of btn(%s)",chr(ix-127+0x40),example,example))
+			local letter = ix-127 -- A=1
+			local example = chr(0x7f+letter)
+			_lint_literal(src,res,"minor",ch,string.format("special symbols (shift-%s / chr(%d)) are not supported. use this, for example: fillp(p8x8_symbol\"%s\") instead of fillp(%s)",chr(letter+0x40),ix,example,example))
 			--todo: dont warn if they already added p8x8_symbol into their code
 		else
 			--katakana, low ascii
-			_lint_literal(src,res,"minor",ch,string.format("special chars (chr(%d)) are not supported",ix))
+			_lint_literal(src,res,"minor",ch,string.format("special symbols (chr(%d)) are not supported",ix))
 		end
 	end
 end

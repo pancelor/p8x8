@@ -17,11 +17,11 @@ Carts may flash rapidly, particularly 30fps carts that fade-out using a flip()-l
 ## quickstart
 
 - Inside Picotron, `load p8x8` then ctrl-r to run
-- Drag mygame.p8 from your Picotron desktop
-	- To get a game from your host OS into Picotron, type `folder` in the terminal and copy the file using your host OS
+- Drag mygame.p8 onto the p8x8 window from your Picotron desktop
+	- To get a game from your host OS into Picotron, type `folder` in the Picotron terminal and copy the file using your host OS
 - Press the export button
-	- this will probably generate warnings; a notepad will open showing you the warnings. Manually change your p8 file, reimport and export
-	- the warning system is not too smart, so it might report warnings for things you've already fixed, or for things that aren't a problem (like code inside comments)
+	- This will probably generate warnings; a notepad will open showing you the warnings. Manually change your p8 file, reimport and export
+	- The warning system might report warnings for things you've already fixed, or for things that aren't a problem (like code inside comments). For a list of the problems it looks for, see `function lint_all` in [warn.lua](https://github.com/pancelor/p8x8/blob/main/src/warn.lua#L74-L89)
 - Double-click the exported cart to run it
 - `load my-exported-cart.p64` and check out `main.lua` for more info. There's an option in there to run the game at fullscreen with a border image!
 
@@ -58,7 +58,7 @@ Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 
 - [x] show lint errors easier
 - [ ] set better scope expectations. how much emulation accuracy are we shooting for (not much)
 - [ ] make CONTRIBUTORS.md
-- [ ] put list of chars that need replacing in docs somewhere, for easy searching: `[█▒🐱⬇️░✽●♥☉웃⌂⬅️😐♪🅾️◆…➡️★⧗⬆️ˇ∧❎▤▥あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんっゃゅょアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンッャュョ◜◝]`
+- [ ] put list of chars that need replacing in docs somewhere, for easy searching: `[¹²³⁴⁵⁶⁷⁸ᵇᶜᵉᶠ▮■□⁙⁘‖◀▶「」¥•、。゛゜█▒🐱⬇️░✽●♥☉웃⌂⬅️😐♪🅾️◆…➡️★⧗⬆️ˇ∧❎▤▥あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんっゃゅょアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンッャュョ◜◝]`
 - [x] `#include` lint
 - [x] `99do` lint
 - [ ] better UI
