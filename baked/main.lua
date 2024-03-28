@@ -8,9 +8,34 @@ function compat(msg)
 --	assert(false,msg)
 end
 
+
+
+-- to run fullscreen with a border, change to true.
+-- to draw a border image, use this tool to create a new
+--   spritesheet saved at gfx/border.gfx,
+--   where sprite 0 is a 480x270 sprite:
+--   https://www.lexaloffle.com/bbs/?pid=importpng#p
+local fullscreen = false
+
+local pause_when_unfocused = true
+
+
+
+has_focus = true --used by p8env.btn/btnp
+if pause_when_unfocused then
+	on_event("lost_focus", function() has_focus = false end)
+	on_event("gained_focus", function() has_focus = true end)
+end
+
 --swap fonts (see /system/lib/head.lua)
 poke(0x5f56, 0x56) -- primary font - p8.font
 poke(0x5f57, 0x40) -- secondary font - lil.font
+
+
+
+--------------------------------
+-- load p8code in a sandbox
+--------------------------------
 
 p8env = {
 	p64env=_ENV, --upgrade path to picotron api
@@ -44,15 +69,11 @@ for name in all(ls("./p8code")) do
 end
 
 
--- to run fullscreen with a border, change to true.
--- to draw a border image, use this tool to create a new
---   spritesheet saved at gfx/border.gfx,
---   where sprite 0 is a 480x270 sprite:
---   https://www.lexaloffle.com/bbs/?pid=importpng#p
-local fullscreen = false
 
-
+--------------------------------
 -- init/update/draw
+--------------------------------
+
 local p8x8_draw
 if fullscreen then
 	local p8canvas = userdata("u8",128,128)
@@ -74,6 +95,8 @@ if fullscreen then
 	end
 	
 	p8x8_draw = function()
+		if not has_focus then return end
+
 		local x,y = winw/2-64,winh/2-64
 		draw_border(x,y)
 		set_draw_target(p8canvas)
@@ -93,16 +116,12 @@ else
 	}
 
 	function p8x8_draw()
+		if not has_focus then return end
+		
 		-- can't set directly b/c cart might change _draw midgame
 		if p8env._draw then p8env._draw() end
 	end
 end
-
----[[ comment out for global controls (multiple games at once!)
-on_event("lost_focus", function() has_focus = false end)
-on_event("gained_focus", function() has_focus = true end)
---]]
-has_focus = true --used by p8env.btn/btnp
 
 saved_btnp=0 --used by p8env.btnp (to deal with 30fps)
 if p8env._update then
@@ -121,6 +140,8 @@ if p8env._update then
 	_init=p8env._init
 	local showframe=false
 	function _update()
+		if not has_focus then return end
+
 		showframe=not showframe
 		if showframe then
 			p8env._update()
@@ -130,6 +151,8 @@ if p8env._update then
 		end
 	end
 	function _draw()
+		if not has_focus then return end
+
 		if showframe then
 			p8x8_draw()
 		end
@@ -137,6 +160,8 @@ if p8env._update then
 else
 	_init=p8env._init
 	function _update()
+		if not has_focus then return end
+
 		-- can't set directly b/c cart might change _update60 midgame
 		if p8env._update60 then p8env._update60() end
 	end

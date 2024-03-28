@@ -45,6 +45,8 @@ This converter is a great if you want to get a cart working in Picotron quickly.
 
 However, if you need access to the Picotron API from inside your PICO-8 code, it's available under the `p64env` table. For example, `fetch` is nil, because the PICO-8 code is sandboxed in a separate environment, but `p64env.fetch` will give you access to Picotron's `fetch` function.
 
+I encourage you to read the main.lua of your generated cart -- it's the main file that Picotron runs, and you can see how it sets up the `p8env` sandbox environment that it uses to load the PICO-8 code. Also, there are some options in there that you can change -- fullscreen (with image border!) and pause_when_unfocused
+
 ## License
 
 Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 can be used in non-commerical projects of any kind, *excluding* projects related to NFTs or LLM/genAI promotion or model training.
