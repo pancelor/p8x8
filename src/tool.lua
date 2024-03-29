@@ -60,3 +60,17 @@ function notify_printh(msg)
 	printh(msg)
 	notify(msg)
 end
+
+-- cp -r, copy recursive
+-- I think vanilla cp() will overwrite the entire destination folder, yikes
+function cpr(from,to)
+	local fs = fstat(from) --could be nil
+	if fs == "file" then
+		cp(from,to)
+	elseif fs == "folder" then
+		mkdir(to)
+		for name in all(ls(from)) do
+			cpr(from.."/"..name, to.."/"..name)
+		end
+	end
+end

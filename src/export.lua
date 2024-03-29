@@ -13,6 +13,9 @@ function export_p64(path)
 		notify_printh "*error: must export as a .p64"
 		return
 	end
+	-- ensure no trailing slash
+	path = rstrip(path,"/")
+
 	if fstat(path) then
 		-- overwriting, make a backup
 		mkdir "/ram/temp/"
@@ -20,18 +23,9 @@ function export_p64(path)
 		timestamp = string.gsub(timestamp,"[^%w]","")
 		mv(path,string.format("/ram/temp/p8x8-%s-%s",timestamp,path:basename()))
 	end
+	cp("baked",path)
 
-	-- ensure no trailing slash
-	path = rstrip(path,"/")
-	
-	mkdir(path)
-	mkdir(path.."/gfx")
-	mkdir(path.."/map")
-	mkdir(path.."/p8code")
-	mkdir(path.."/sfx") -- probably not necessary? but startup.lua makes it by default
 	store(path.."/window_title.txt",path:basename())
-
-	export_baked(path)
 
 	export_gfxfull(path.."/gfx/full.gfx")
 	export_gfx(path.."/gfx/0.gfx")
@@ -162,36 +156,4 @@ function export_gfx(path)
 --		}
 --	)
 end
-
-function export_baked(folder)
-	assert(sub(folder,-1) != "/")
-	
-	local p8x8_path = env().prog_name
-	if sub(p8x8_path,1,8)=="/system/" then -- e.g. running from terminal
-		local main = env().corun_program
-		p8x8_path = main:dirname()
-	end
-	local baked = p8x8_path.."/baked"
-	if not fstat(baked) then
-		notify_printh("could not find baked/: "..baked)
-		return
-	end
-	cpr(baked,folder)
-end
-
--- cp -r, copy recursive
--- vanilla cp() will overwrite the entire destination folder
-function cpr(from,to)
-	local fs = fstat(from) --could be nil
-	if fs == "file" then
-		cp(from,to)
-	elseif fs == "folder" then
-		mkdir(to)
-		for name in all(ls(from)) do
-			cpr(from.."/"..name, to.."/"..name)
-		end
-	end
-end
-
-
 

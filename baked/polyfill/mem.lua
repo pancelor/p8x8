@@ -1,16 +1,22 @@
 --[[pod_format="raw",created="2024-03-20 01:20:21",modified="2024-03-22 13:58:18",revision=60]]
---COMPAT: mem layout is certainly different. what else is going to break here?
---TODO: translation layer for the internal API stuff? e.g. video modes etc
---  the stuff from http://pico8wiki.com/index.php?title=Memory
-
-p8env.memcpy=memcpy
-p8env.memset=memset
-p8env.peek=peek
-p8env.peek2=peek2
-p8env.peek4=peek4
-p8env.poke=poke
-p8env.poke2=poke2
-p8env.poke4=poke4
+-- COMPAT: these will work, but probably won't do what you expect
+--   (b/c picotron memory is laid out differently from pico8 memory)
+-- To avoid compat() spam, edit your exported cart to use p64env.poke() etc,
+--   if you know that the address you're poking is still correct in Picotron
+local function mem_warn(name,func)
+	return function(...)
+		compat(name.."() might not work due to memory layout changes")
+		return func(...)
+	end
+end
+p8env.memcpy=mem_warn("memcpy",memcpy)
+p8env.memset=mem_warn("memset",memset)
+p8env.peek=mem_warn("peek",peek)
+p8env.peek2=mem_warn("peek2",peek2)
+p8env.peek4=mem_warn("peek4",peek4)
+p8env.poke=mem_warn("poke",poke)
+p8env.poke2=mem_warn("poke2",poke2)
+p8env.poke4=mem_warn("poke4",poke4)
 
 local _cartdata
 function p8env.cartdata(name)
@@ -65,7 +71,7 @@ function p8env.reload(dest_addr,src_addr,len, filename)
 	if dest_addr==src_addr then
 		local addr0,addr1 = src_addr,src_addr+len
 		if addr0==0x0000 and 0x1000<=addr1 then
-			-- TODO reload all sprites in 0.gfx
+			reload_sprites()
 			if addr0==0x0000 and 0x1000==addr1 then
 				return
 			end

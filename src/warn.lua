@@ -4,27 +4,22 @@ function process_code(cart)
 	local tabs = cart.lua
 	if not tabs then return true end
 
-	local warns = {major={},minor={}} -- major = cart will not run   minor = cart needs adjustments
+	local warns = {}
 	local global_lno = 3 --skip p8 header
 	for ti=1,#tabs do
 		local lineno = lineno_build(tabs[ti])
 		for warn in all(lint_all(tabs[ti])) do
 			local lno = lineno_lookup(lineno,warn.index)
-			local msg = string.format("WARN(%s): %d.lua#%d (p8:%d) %s",warn.kind,ti-1,lno,global_lno+lno,warn.msg)
+			local msg = string.format("WARN(%s): %d.lua#%d (p8:%d) %s",tostr(warn.lvl),ti-1,lno,global_lno+lno,warn.msg)
 			printh(msg)
-			assert(warns[warn.kind],warn.kind) -- major or minor
-			add(warns[warn.kind],msg)
+			add(warns,msg)
 		end
 		global_lno += #lineno+2
 	end
-	if #warns.major>0 then
-		sort_shell(warns.major)
-		cart.lua_warn = table.concat(warns.major,"\n")
-		notify_printh(string.format("(%d more) %s",#warns.major,warns.major[1]))
-	elseif #warns.minor>0 then
-		sort_shell(warns.minor)
-		cart.lua_warn = table.concat(warns.minor,"\n")
-		notify_printh(string.format("(%d more) %s",#warns.minor,warns.minor[1]))
+	if #warns>0 then
+		sort_shell(warns) --major will be first, nice
+		cart.lua_warn = table.concat(warns,"\n")
+		notify_printh(string.format("(%d more) %s",#warns,warns[1]))
 	end
 	return true
 end
@@ -52,45 +47,55 @@ function lineno_lookup(lineno,index)
 	return #lineno
 end
 
-local function _lint_find(src,res,kind,substr,plain,msg)
+local function _lint_find(src,res,lvl,substr,plain,msg)
 	local ri=1
 	for i=1,100 do --sentinel
 		local i0,i1 = string.find(src,substr,ri,plain)
 		if not i0 then
 			break
 		end
-		add(res,{kind=kind,index=i0,msg=msg})
+		add(res,{lvl=lvl,index=i0,msg=msg})
 		ri = i1+1
 	end
 end
-local function _lint_literal(src,res,kind,substr,msg)
-	_lint_find(src,res,kind,substr,true,msg)
+local function _lint_literal(src,res,lvl,substr,msg)
+	_lint_find(src,res,lvl,substr,true,msg)
 end
-local function _lint_pattern(src,res,kind,substr,msg)
-	_lint_find(src,res,kind,substr,false,msg)
+local function _lint_pattern(src,res,lvl,substr,msg)
+	_lint_find(src,res,lvl,substr,false,msg)
 end
 
 -- takes a code string, and returns a list of warning strings
 function lint_all(src)
 	local res = {}
-	_lint_literal(src,res,"minor","[^:]//",[['//' is not a valid comment (change to '--'?)]]) --avoid colons b/c of URL false-positives
-
-	_lint_pattern(src,res,"minor","\n%s*#include",[['#include' is not supported -- re-export your cart from PICO-8 as a .p8.png and then back to .p8 to inline the includes`]])
+	_lint_pattern(src,res,1,"\n%s*#include",[['#include' is not supported -- re-export your cart from PICO-8 as a .p8.png and then back to .p8 to inline the includes`]])
 	-- you could instead write `p64env.include(filename)`,
 	--   but the nuances are complicated -- need to move that file manually to
 	--   the correct path, p8x8 won't generate warnings for that file, and I'm
 	--   not 100% sure whether `include`ing will stay within the p8env sandbox
 
-	_lint_pattern(src,res,"minor","[%d]do[^%w]",[[numbers into keywords need whitespace; e.g. "99do" => "99 do"]])
-	_lint_pattern(src,res,"minor","[%d]then[^%w]",[[numbers into keywords need whitespace; e.g. "99then" => "99 then"]])
-	_lint_pattern(src,res,"minor","[%d]and[^%w]",[[numbers into keywords need whitespace; e.g. "99and" => "99 and"]])
-	_lint_pattern(src,res,"minor","[%d]or[^%w]",[[numbers into keywords need whitespace; e.g. "99or" => "99 or"]])
-	_lint_pattern(src,res,"major","[^<>]>>>[^<>]",[[lshr (>>>) is not supported]])
-	_lint_pattern(src,res,"major","[^<>]<<>[^<>]",[[rotl (>>>) is not supported]])
-	_lint_pattern(src,res,"major","[^<>]>><[^<>]",[[rotr (>>>) is not supported]])
-	_lint_pattern(src,res,"major","[^%w]load%s*%(",[[cart chaining (load()) is not supported]])
-	lint_symbols(src,res)
+	_lint_pattern(src,res,1,"[%d]do[^%w]",[[numbers into keywords need whitespace; e.g. "99do" => "99 do"]])
+	_lint_pattern(src,res,1,"[%d]then[^%w]",[[numbers into keywords need whitespace; e.g. "99then" => "99 then"]])
+	_lint_pattern(src,res,1,"[%d]and[^%w]",[[numbers into keywords need whitespace; e.g. "99and" => "99 and"]])
+	_lint_pattern(src,res,1,"[%d]or[^%w]",[[numbers into keywords need whitespace; e.g. "99or" => "99 or"]])
+	_lint_pattern(src,res,1,"[^<>]>>>[^<>]",[[lshr (>>>) is not supported]])
+	_lint_pattern(src,res,1,"[^<>]<<>[^<>]",[[rotl (>>>) is not supported]])
+	_lint_pattern(src,res,1,"[^<>]>><[^<>]",[[rotr (>>>) is not supported]])
+	_lint_pattern(src,res,1,"[^%w]load%s*%(",[[cart chaining (load()) is not supported]])
+	_lint_pattern(src,res,2,"[^:]//",[['//' is not a valid comment (change to '--'?)]]) --avoid colons b/c of URL false-positives
+	_lint_pattern(src,res,2,"[^%w]tline%s*%(",[[tline isn't supported yet - TODO]])
+	_lint_pattern(src,res,2,"[^%w]cstore%s*%(",[[cstore isn't supported]])
+	_lint_pattern(src,res,2,"[^%w]serial%s*%(",[[serial isn't supported]])
+	_lint_pattern(src,res,2,"[^%w]reload%s*%(",[[reload only has partial support]])
+	lint_memory(src,res,3)
+	lint_symbols(src,res,3)
 	return res
+end
+
+function lint_memory(src,res,lvl)
+	for name in all{"poke","poke2","poke4","peek","peek2","peek4","memset","memcpy"} do
+		_lint_pattern(src,res,lvl,"[^%w]"..name.."%s*%(",name..[[: PICO-8 memory layout is not emulated; this might not work]])
+	end
 end
 
 --[[ generate this table in PICO-8 with this code + manual cleanup (\\ and \" need editing)
@@ -119,7 +124,7 @@ local p8scii = {
 	"ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", "マ", "ミ", "ム", "メ", "モ", "ヤ",
 	"ユ", "ヨ", "ラ", "リ", "ル", "レ", "ロ", "ワ", "ヲ", "ン", "ッ", "ャ", "ュ", "ョ", "◜", "◝",
 }
-function lint_symbols(src,res)
+function lint_symbols(src,res,lvl)
 	for ix,ch in ipairs(p8scii) do
 		if (32<=ix and ix<=126) or ix==9 or ix==10 or ix==13 then
 			-- no problem, move on
@@ -127,11 +132,11 @@ function lint_symbols(src,res)
 			-- shift-letter
 			local letter = ix-127 -- A=1
 			local example = chr(0x7f+letter)
-			_lint_literal(src,res,"minor",ch,string.format("special symbols (shift-%s / chr(%d)) are not supported. use this, for example: fillp(p8x8_symbol\"%s\") instead of fillp(%s)",chr(letter+0x40),ix,example,example))
+			_lint_literal(src,res,lvl,ch,string.format("special symbols (shift-%s / chr(%d)) are not supported. use this, for example: fillp(p8x8_symbol\"%s\") instead of fillp(%s)",chr(letter+0x40),ix,example,example))
 			--todo: dont warn if they already added p8x8_symbol into their code
 		else
 			--katakana, low ascii
-			_lint_literal(src,res,"minor",ch,string.format("special symbols (chr(%d)) are not supported",ix))
+			_lint_literal(src,res,lvl,ch,string.format("special symbols (chr(%d)) are not supported",ix))
 		end
 	end
 end

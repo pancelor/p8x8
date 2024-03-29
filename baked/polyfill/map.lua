@@ -6,7 +6,7 @@
 local _map
 
 function load_map(path)
-	local map64 = fetch(path) 
+	local map64 = fetch(path)
 	if map64 then
 		memmap(0x100000, map64[1].bmp)
 		return map64[1].bmp --first layer
@@ -22,6 +22,7 @@ if not _map then
 	function p8env.mset() end
 	function p8env.map() end
 	p8env.mapdraw = p8env.map
+	function p8env.tline() end
 
 	return
 end
@@ -73,4 +74,20 @@ function p8env.map(celx,cely, sx,sy, celw,celh, flags)
 	-- camera(camx,camy)
 end
 p8env.mapdraw = p8env.map
-	
+
+function p8env.tline(x0,y0,x1,y1,mx,my, mdx,mdy)
+	compat("TODO: basic tline support") --https://github.com/pancelor/p8x8/issues/8
+	-- return tline3d(_map,?)
+	--[[
+	http://pico8wiki.com/index.php?title=Tline
+	https://www.lexaloffle.com/dl/docs/picotron_gfx_pipeline.html#tline3d
+		tline3d(src, x0, y0, x1, y1, u0, v0, u1, v1, [w0, w1])
+		
+		src can be either a bitmap or a map
+		x,y are screen pixels (ints)
+		u,v are texture coordinates in pixels
+		w is 1/z, useful for perspective-correct texture mapping
+		u,v should be given as u/z and v/z
+		when w0 and w1 are both 1 (the default), tline3d is linear
+	]]	
+end

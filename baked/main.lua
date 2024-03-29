@@ -79,29 +79,32 @@ if fullscreen then
 	local p8canvas = userdata("u8",128,128)
 	
 	vid(0)  local winw,winh = 480,270
-	--vid(3)  local winw,winh = 240,135 -- ok size but very bad flashing...
+	--vid(3)  local winw,winh = 240,135
 	
-	-- x,y: top-left corner of the p8 screen
-	function draw_border(x,y)
+	function draw_border()
 		draw_border = function() end -- only run once
 		local spr_border = fetch "gfx/border.gfx"
-		if spr_border then
-			spr(spr_border[0].bmp)
-		else
-			cls()
-			rectfill(x-8,y-8,x+127+8,y+127+8,1)
-			print("\#1p8x8",x+118,y+130,0x12)
-		end
+		palt(0,false)
+		spr(spr_border[1].bmp) --draw sprite 1 from border.gfx
+		palt(0,true)
+		--[[
+		cls()
+		local x,y = winw/2-64,winh/2-64
+		rectfill(x-8,y-8,x+127+8,y+127+8,1)
+		print("\#1p8x8",x+118,y+130,0x12)
+		--]]
 	end
 	
 	p8x8_draw = function()
 		if not has_focus then return end
-
-		local x,y = winw/2-64,winh/2-64
-		draw_border(x,y)
+		
+		draw_border()
+		
 		set_draw_target(p8canvas)
 		if p8env._draw then p8env._draw() end
 		set_draw_target()
+		
+		local x,y = winw/2-64,winh/2-64
 		blit(p8canvas,get_draw_target(),0,0,x,y)
 	end
 else
@@ -127,6 +130,7 @@ saved_btnp=0 --used by p8env.btnp (to deal with 30fps)
 if p8env._update then
 	--30fps
 	--[[
+	--this crashes picotron, oops
 	p8env._init()
 	while 1 do
 		p8env._update()
@@ -134,7 +138,6 @@ if p8env._update then
 		flip()
 		flip()
 	end
-	-- this crashes picotron, oops
 	--]]
 
 	_init=p8env._init

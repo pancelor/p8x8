@@ -157,7 +157,7 @@ end
 p8env.assert=assert
 p8env.trace=debug.traceback
 p8env.stop=stop
-p8env.time=time
+p8env.time=time --COMPAT: time keeps running when the game is paused due to pause_when_unfocused
 p8env.t=time
 p8env.type=type
 p8env.select=select

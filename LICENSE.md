@@ -8,5 +8,5 @@ work. If not, see <https://creativecommons.org/licenses/by-nc/4.0/>.
 
 
 Modifications:
-- Projects related to NFTs or LLM/genAI promotion or model
-training are forbidden from using p8x8.
+- Projects related to NFTs/cryptocoins, or projects related to LLM/genAI
+promotion or model training are forbidden from using p8x8.

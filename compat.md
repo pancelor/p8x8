@@ -15,7 +15,7 @@ Here's a list of the high-level areas where p8x8 does not emulate pico8 perfectl
 These areas will likely remain incompatible, and will require changes to get a cart working in Picotron:
 
 - special symbols (like pressing shift-X in PICO-8 to create ❎) are not supported
-	- p8x8 generates warnings every time it notices these special symbols, and the warnings suggest an easy upgrade path for the btn/fillp use case: `WARN(minor): 1.lua#102 (p8:234) special chars (shift-X / chr(151)) are not supported. use this, for example: fillp(p8x8_symbol"❎") instead of fillp(❎)`
+	- p8x8 generates warnings every time it notices these special symbols, and the warnings suggest an easy upgrade path for the btn/fillp use case: `WARN(3): 1.lua#102 (p8:234) special chars (shift-X / chr(151)) are not supported. use this, for example: fillp(p8x8_symbol"❎") instead of fillp(❎)`
 	- p8x8 doesn't know what your intent for the symbol is (is it a printed visual? is it a btn/fillp-like argument? is it part of encoded binary data) and it prefers not to guess, leaving the decision to the user who knows their code much better than p8x8 does anyway.
 - memory (e.g. peek/poke/memcpy) is not emulated. The calls will still go through to Picotron's memory, but the effects will be different
 - numbers -- Picotron uses 64-bit floats as numbers, but PICO-8 uses 16.16 fixed-point numbers. Anything relying on the exact format of PICO-8 numbers will probably have problems.
