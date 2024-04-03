@@ -55,6 +55,8 @@ I encourage you to read the [main.lua file](./baked/main.lua) of your generated 
 
 Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 can be used in non-commerical projects of any kind, *excluding* projects related to NFTs/cryptocoins, or projects related to LLM/genAI promotion or model training.
 
+Just say something like "converted using p8x8: https://lexaloffle.com/bbs/?pid=p8x8" in your description or credits, don't sell your game, and you're good to go. See the [license](https://creativecommons.org/licenses/by-nc/4.0/) for full details.
+
 ## HELP WANTED
 - open an [issue](https://github.com/pancelor/p8x8/issues) or leave a comment on the [BBS thread](https://www.lexaloffle.com/bbs/?pid=p8x8#p) if you tried to use this tool and got confused -- then I can try to smooth off that corner and help others in the future be less confused
 - add support for importing [sfx/music](https://github.com/pancelor/p8x8/issues/5)
