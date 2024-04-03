@@ -1,16 +1,18 @@
---[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-03-22 14:26:42",revision=1403]]
+--[[pod_format="raw",created="2024-03-15 21:08:04",modified="2024-04-03 21:55:58",revision=1412]]
 printh"---"
--- dev = true
-dev_include_lib = dev
+
+
+dev = fstat"/ram/devmode.txt" and env().corun_program
 -- dev_export_filename = dev and "/desktop/temp.p64"
 
 
-local function include_lib(name)
-	if dev_include_lib and not fstat(name) then
-		cp("/appdata/system/"..name,name)
-	end
+local function _include_lib(name,cond)
+	if (cond) cp("/appdata/system/"..name,"/ram/cart/"..name)
 	include(name)
 end
+local function include_lib(name) _include_lib(name,dev and not fstat(name)) end
+local function include_libf(name) _include_lib(name,dev) end --force
+
 
 include_lib "lib/pq.lua"
 include_lib "lib/sort.lua"
@@ -24,7 +26,7 @@ include "src/export.lua"
 
 function _init()
 	reset_state() --set up the window
-
+	pqn("hello!")
 	menuitem{
 		id = "clear",
 		label = "\^:0f19392121213f00 Clear",
