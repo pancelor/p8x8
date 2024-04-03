@@ -41,6 +41,7 @@ function _init()
 				path="/desktop",
 				intention="save_file_as", -- TODO: I'd rather use "open_file" but the filesystem doesn't let me process the file -- it tries to literally open it (and fails b/c it doesn't know how to open a .p8)
 				window_attribs={workspace="current", autoclose=true},
+				--use_ext="p8",
 			})
 		end,
 	}

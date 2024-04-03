@@ -30,10 +30,10 @@ Carts may flash rapidly, particularly 30fps carts that fade-out using a flip()-l
 
 ## compatibility
 
-Not everything will work. This is meant as a starting point, requiring manual changes after converting. Three major areas that are unsupported:
-1. memory (e.g. peek/poke/memcpy) is not emulated. The calls will still go through to Picotron's memory, but the effects will be different
-2. numbers -- Picotron uses a 64-bit float numeric type, while PICO-8 uses 16.16 fixed-point numbers. Anything relying on the exact format of PICO-8 numbers will probably have problems.
-3. sfx/music - this should be possible to convert, but it's not yet supported 
+Not everything will work. This tool is designed to give you a starting point, and requires manual changes after converting. Three major areas are unsupported:
+1. **memory** (e.g. peek/poke/memcpy) is not emulated. The calls will still go through to Picotron's memory, but the effects will be different
+2. **numbers** -- Picotron uses a 64-bit float numeric type, while PICO-8 uses 16.16 fixed-point numbers. Anything relying on the exact format of PICO-8 numbers (e.g. bitwise operators) will probably have problems.
+3. **sfx/music** - this is not supported [yet](https://github.com/pancelor/p8x8/issues/5).
 
 For more notes, see [compat.md](./compat.md)
 
@@ -42,15 +42,6 @@ For more notes, see [compat.md](./compat.md)
 PICO-8 carts expect various things to be in the global environment, things like `spr`, `mget`, etc. Some of these exist in Picotron's global environment, but many are slightly different, and some are missing altogether. (Picotron does many things differently from PICO-8, so there's no reason to expect everything would stay exactly the same)
 
 The goal of this tool is to let you run carts written in "PICO-8 lua" inside of Picotron. This is achieved by sandboxing the PICO-8 code, and giving it a specially crafted global environment that has all of the standard functions it expects.
-
-Here's an overview of p8x8's parts:
-- `./main.lua`, `./src/gui.lua` - the main interface for p8x8
-- `./src/import.lua`, `./src/export.lua` - reading p8 files and writing p64 files
-- `./warn.lua` - the system that reads imported code and produces compatibility warnings
-- `./baked` - this folder is the template for exported p64 carts
-	- `./baked/main.lua` - the main file for the exported cart. it sets up the `p8env` sandbox and handles fullscreen drawing and keyboard focus
-	- `./baked/polyfill/` - every file in this folder is automatically loaded in exported carts. these files add functions to the `p8env` sandbox, which is the global environment for exported carts
-- `./src/tool.lua`, `./lib/` - some generally helpful code libraries
 
 ## Picotron API
 
@@ -65,14 +56,15 @@ I encourage you to read the [main.lua file](./baked/main.lua) of your generated 
 Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 can be used in non-commerical projects of any kind, *excluding* projects related to NFTs/cryptocoins, or projects related to LLM/genAI promotion or model training.
 
 ## HELP WANTED
-- open an [issue](https://github.com/pancelor/p8x8/issues) or message me if you tried to use this tool and got confused -- then I can try to smooth off that corner and help others in the future be less confused
-- sfx/music -- I can handle importing and exporting the data, but I have no clue how to map the data itself into something inside Picotron's audio system that will sound similar
-- basic `tline()` support -- see [issue #8](https://github.com/pancelor/p8x8/issues/8)
+- open an [issue](https://github.com/pancelor/p8x8/issues) or leave a comment on the [BBS thread](https://www.lexaloffle.com/bbs/?pid=p8x8#p) if you tried to use this tool and got confused -- then I can try to smooth off that corner and help others in the future be less confused
+- add support for importing [sfx/music](https://github.com/pancelor/p8x8/issues/5)
+- add basic support for [tline()](https://github.com/pancelor/p8x8/issues/8)
+- more info in [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## TODO
 - [x] show lint errors easier
-- [ ] set better scope expectations. how much emulation accuracy are we shooting for (not much)
-- [ ] make CONTRIBUTORS.md
+- [x] set better scope expectations. how much "emulation accuracy" are we aiming for (not much)
+- [x] make CONTRIBUTING.md
 - [ ] put list of chars that need replacing in docs somewhere, for easy searching: `[¹²³⁴⁵⁶⁷⁸ᵇᶜᵉᶠ▮■□⁙⁘‖◀▶「」¥•、。゛゜█▒🐱⬇️░✽●♥☉웃⌂⬅️😐♪🅾️◆…➡️★⧗⬆️ˇ∧❎▤▥あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんっゃゅょアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンッャュョ◜◝]`
 - [x] `#include` lint
 - [x] `99do` lint

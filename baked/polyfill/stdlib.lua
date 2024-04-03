@@ -7,11 +7,13 @@
 --   p64 uses lua's math.random (I think)
 -- we choose speed here over emulation accuracy;
 --   rnd() will return different results in p64
-p8env.rnd=rnd
 function p8env.srand(seed)
 	-- srand truncates its input to an int now,
 	-- so... shift the seed 16 bits left
 	return srand(seed*65536)
+end
+function p8env.rnd(mult)
+	return rnd(tonum(mult)) --make rnd"100" work
 end
 
 p8env.abs=abs
@@ -75,8 +77,18 @@ p8env.rawset=rawset
 -- TABLES
 ----------------
 
+--COMPAT: add now behaves slightly differently with nil args:
+--  add(nil) throws errors now
+--  add(tab,elem,nil) throws errors now
+--this may be a bit too far in terms of "emulation accuracy"...
+function p8env.add(tab,elem,ix)
+	if type(tab)!="table" then return end
+	table.insert(tab,ix and tonumber(ix) or #tab+1,elem)
+	return elem
+end
+-- p8env.add=add
+
 p8env.pairs=pairs
-p8env.add=add
 p8env.all=all
 p8env.count=count
 p8env.del=del
@@ -187,6 +199,7 @@ local _stat_switch={
 	[34]=function() return select(3,mouse()) end, --mouse_b
 	[35]=function() return select(4,mouse()) end, --wheel_x
 	[36]=function() return select(5,mouse()) end, --wheel_y
+	-- for time/day/year stats, see https://www.lexaloffle.com/bbs/?pid=145425#p
 }
 function p8env.stat(id)
 	local fn = _stat_switch[id]
