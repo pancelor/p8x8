@@ -12,11 +12,25 @@ Drag a p8 cart in, export a p64 cart, make some minor edits to the code, and voi
 
 The goal here is not to perfectly emulate PICO-8 -- instead, the tool attempts to convert things well enough, and expects the user to make manual tweaks afterwards.
 
-## photosensitivity warning
+## Table of Contents
+<!-- https://github.com/derlin/bitdowntoc -->
+- [USAGE GUIDE](#usage-guide)
+  - [Quickstart](#quickstart)
+  - [Compatibility](#compatibility)
+  - [Photosensitivity warning](#photosensitivity-warning)
+  - [License](#license)
+- [Details, more info](#details-more-info)
+  - [How p8x8 works](#how-p8x8-works)
+  - [Picotron API](#picotron-api)
+  - [Updating your cart when p8x8 updates](#updating-your-cart-when-p8x8-updates)
+  - [Help wanted](#help-wanted)
+  - [TODO](#todo)
 
-Carts may flash rapidly, particularly 30fps carts that fade-out using a flip()-loop. Use at your own risk, and test your converted carts before distributing them.
 
-## quickstart
+
+# USAGE GUIDE
+
+## Quickstart
 
 - Put p8x8 and your PICO-8 cartridge into Picotron's filesystem
 	- Type `folder` in the Picotron terminal to open the current folder using your host OS
@@ -26,9 +40,11 @@ Carts may flash rapidly, particularly 30fps carts that fade-out using a flip()-l
 	- A notepad will likely open up, showing the warnings that p8x8 generated. Manually change your p8 file, reimport and export
 	- The warning system might report warnings for things you've already fixed, or for things that aren't a problem (like code inside comments). For a list of the problems it looks for, see `function lint_all` in [warn.lua](https://github.com/pancelor/p8x8/blob/main/src/warn.lua#L74-L89)
 - Double-click the exported cart to run it!
-	- `load mygame.p64` and check out `main.lua` for more info. There's an option in there to run the game fullscreen with a border image!
+	- `load mygame.p64` and check out `main.lua` for more info/options
 
-## compatibility
+Fullscreen mode: edit `main.lua` in your generated p64 cart -- there's an option to run the game fullscreen with a border image! But make sure that all of your cart's drawing functions are called from `_draw` (or some function called by `_draw`, recursively). If your cart runs any drawing functions during `_init` or `_update`, the fullscreen border will [look wrong](https://github.com/pancelor/p8x8/issues/9).
+
+## Compatibility
 
 Not everything will work. This tool is designed to give you a starting point, and requires manual changes after converting. Three major areas are unsupported:
 1. **memory** (e.g. peek/poke/memcpy) is not emulated. The calls will still go through to Picotron's memory, but the effects will be different
@@ -37,7 +53,21 @@ Not everything will work. This tool is designed to give you a starting point, an
 
 For more notes, see [compat.md](./compat.md)
 
-## how does it work
+## Photosensitivity warning
+
+~~Carts that change the palette may flash rapidly.~~ This seems fixed as of Picotron 0.1.0e! But it seems worth noting still. Use at your own risk, and test your converted carts before distributing them.
+
+## License
+
+Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 can be used in non-commerical projects of any kind, *excluding* projects related to NFTs/cryptocoins, or projects related to LLM/genAI promotion or model training.
+
+Just say something like "converted using p8x8: https://lexaloffle.com/bbs/?pid=p8x8" in your description or credits, don't sell your game, and you're good to go. See the [license](https://creativecommons.org/licenses/by-nc/4.0/) for full details.
+
+
+
+# Details, more info
+
+## How p8x8 works
 
 PICO-8 carts expect various things to be in the global environment, things like `spr`, `mget`, etc. Some of these exist in Picotron's global environment, but many are slightly different, and some are missing altogether. (Picotron does many things differently from PICO-8, so there's no reason to expect everything would stay exactly the same)
 
@@ -51,13 +81,11 @@ However, if you need access to the Picotron API from inside your PICO-8 code, it
 
 I encourage you to read the [main.lua file](./baked/main.lua) of your generated cart -- it's the main file that Picotron runs, and you can see how it sets up the `p8env` sandbox environment. Also, there are some options in there that you can change -- fullscreen (with image border!) and `pause_when_unfocused`.
 
-## License
+## Updating your cart when p8x8 updates
 
-Modified [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) - p8x8 can be used in non-commerical projects of any kind, *excluding* projects related to NFTs/cryptocoins, or projects related to LLM/genAI promotion or model training.
+[TODO](https://github.com/pancelor/p8x8/issues/10)
 
-Just say something like "converted using p8x8: https://lexaloffle.com/bbs/?pid=p8x8" in your description or credits, don't sell your game, and you're good to go. See the [license](https://creativecommons.org/licenses/by-nc/4.0/) for full details.
-
-## HELP WANTED
+## Help wanted
 - open an [issue](https://github.com/pancelor/p8x8/issues) or leave a comment on the [BBS thread](https://www.lexaloffle.com/bbs/?pid=p8x8#p) if you tried to use this tool and got confused -- then I can try to smooth off that corner and help others in the future be less confused
 - add support for importing [sfx/music](https://github.com/pancelor/p8x8/issues/5)
 - add basic support for [tline()](https://github.com/pancelor/p8x8/issues/8)
