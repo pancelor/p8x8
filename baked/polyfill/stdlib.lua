@@ -111,7 +111,7 @@ end
 function p8env.btn(b, p)
 	-- picotron btn() returns either false or axis strength (0-255)
 	local fn=btn
-	p=(p or 0)*8
+	p=(p or 0)*16
 	if b then
 		return has_focus and fn(b+p)!=false
 	else
@@ -129,7 +129,7 @@ function p8env.btn(b, p)
 end
 function p8env.btnp(b, p)
 	local fn=btnp
-	p=(p or 0)*8
+	p=(p or 0)*16
 	if b then
 		return has_focus and fn(b+p)!=false or (saved_btnp>>(b+p))&1==1 --see main.lua
 	else
