@@ -47,11 +47,11 @@ function p8env.map(celx,cely, sx,sy, celw,celh, flags)
 	celh = celh or 64
 	
 	-- TODO: speed: dont draw off-camera
-	-- local camx,camy = camera()
+	-- local cam_x,cam_y = peek4(0x5510,2)
 	-- local x0,y0 = (camx-sx)\8,(camy-sy)\8 --?
 	-- camera(camx-sx,camy-sy)
 
-	local _mget = p8env.mget
+	local _mget,fget,spr = p8env.mget,fget,spr
 	if flags and flags!=0 then
 		for dy=0,celh-1 do
 			for dx=0,celw-1 do

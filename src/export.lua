@@ -70,10 +70,7 @@ function export_tabs(path)
 end
 
 function export_map(path)
-	if not active_cart or not active_cart.map then
-		printh("export_map: no map data")
-		return
-	end
+	assert(active_cart.map)
 	assert(path,"no filename?")
 
 	-- view expected structure with: podtree /ram/cart/map/0.map

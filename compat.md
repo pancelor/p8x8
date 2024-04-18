@@ -2,7 +2,7 @@ This project does not aim for perfect emulation of pico8. It aims to make it eas
 
 p8x8 will generate warnings at import time if it notices likely problems. See `function lint_all` in [warn.lua](https://github.com/pancelor/p8x8/blob/main/src/warn.lua#L74-L89) for details.
 
-## compatibility differences
+## Compatibility differences
 
 When p8x8 builds a .p64 file for you, the cart's `main.lua` file has a function `compat` at the top. This is called by the p8x8 sandbox/translation-layer (`p8env`) whenever p8x8 realizes it is running incompatible behavior. By default, `compat` will print these warnings to the host console, but you could change it to `assert` or `notify` in addition.
 
@@ -10,7 +10,7 @@ For more in-depth compatibility notes, search for "COMPAT" inside the [baked/pol
 
 Here's a list of the high-level areas where p8x8 does not emulate pico8 perfectly:
 
-### wontfix
+### Wontfix
 
 These areas will likely remain incompatible, and will require changes to get a cart working in Picotron:
 
@@ -25,10 +25,10 @@ These areas will likely remain incompatible, and will require changes to get a c
 - you can only draw inside the `_draw` function
 	- carts that use `goto` loops are not supported
 
-### todo
+### Todo
 
 These areas will hopefully become compatible in the future. For now, they require changes to get a cart working in Picotron:
 
 - [custom fonts](https://github.com/pancelor/p8x8/issues/4) don't seem to work, I suspect the data format may be different?
 - top-level local variables are not visible across different tabs. this can be changed inside main.lua of p8x8's output, but it will lead to worse error messages. I recommend making top-level locals global instead.
-- [pausing the game](https://github.com/pancelor/p8x8/issues/7) is not supported. (but menuitems are supported -- they show up in the window's menu)
+- [pausing the game](https://github.com/pancelor/p8x8/issues/7) is a bit awkward -- menuitems show up in the window's menu, but PICO-8's ingame pause menu is not supported. When the window loses focus it will pause automatically (configurable -- see `pause_when_unfocused` inside main.lua in your exported cart)

@@ -98,7 +98,8 @@ end
 -- can stuff a full 128x128 image into a single sprite if you want
 local _gfx_all,_gfx_sheet
 function reload_sprites()
-	_gfx_all = fetch("gfx/full.gfx")[1].bmp
+	local full = fetch("gfx/full.gfx")
+	_gfx_all = full[1].bmp
 	_gfx_sheet = fetch("gfx/0.gfx")
 end
 reload_sprites()

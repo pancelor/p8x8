@@ -16,17 +16,17 @@ Parts of a great bug report:
 
 Thanks for submitting improvements!! Two things to note:
 
-### legal stuff
+### Legal stuff
 
 When contributing to this project, you must agree that you have authored 100% of the content, that you have the necessary rights to the content and that the content you contribute may be provided under the project's [license](./LICENSE.md).
 
-### emulation accuracy
+### Emulation accuracy
 
 p8x8 can be seen as a PICO-8 emulator, in a sense, and it is tempting to try to increase the "emulation accuracy". However, in many cases this would make the code very complicated, harder to maintain, and harder to understand. I am not interested in turning p8x8 into a magic emulator that Just Works, and I don't want to give off that impression to users. It is instead intended to be a "80%" tool -- doing a bunch of "easy" work, and leaving the final details to the user.
 
 If you have a pull request that seems obviously good to you, adding features and increasing "emulation accuracy", please submit it! I might accept the changes, or I might reject some or all of the changes. But even if no changes are merged, the pull request still exists for others to benefit from. I'll be grateful that you suggested changes, and I hope you'll understand if I don't accept them -- we probably just have different visions for what p8x8 should be.
 
-### how is the code organized?
+### How is the code organized?
 
 Here's an overview of p8x8's parts:
 - `./main.lua`, `./src/gui.lua` - the main interface for p8x8

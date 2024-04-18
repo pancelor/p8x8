@@ -7,7 +7,7 @@ function import_p8(path)
 	end
 	notify_printh "importing..."
 	export_path = sub(path,1,-#ext-2)..".p64"
-	active_cart=parse_p8(path)
+	active_cart = parse_p8(path)
 	gui_set_preview_image(active_cart.gfx)
 	if process_code(active_cart) then
 		notify_printh "imported!"
@@ -21,35 +21,36 @@ function parse_p8(path)
 	assert(filestr)
 	filestr = filestr:gsub("\r\n","\n") -- normalize line endings
 	
-	local cart={}
-	cart.lua=parse_p8_lua(filestr)
-	cart.gfx=parse_p8_gfx(filestr)
-	cart.gff=parse_p8_gff(filestr)
-	cart.map=parse_p8_map(filestr)
-	cart.lua_warn=nil
+	local cart = {}
+	cart.lua = parse_p8_lua(filestr)
+	cart.gfx = parse_p8_gfx(filestr)
+	cart.gff = parse_p8_gff(filestr)
+	cart.map = parse_p8_map(filestr)
+	cart.lua_warn = nil
 --	__label__
---	cart.sfx=parse_p8_sfx(filestr)
---	cart.music=parse_p8_music(filestr)
+--	cart.sfx = parse_p8_sfx(filestr)
+--	cart.music = parse_p8_music(filestr)
 	return cart
 end
 
 -- returns a list of strings (tab contents)
 function parse_p8_lua(filestr)
+	local tabs = {}
+
 	local luastr = p8_section_extract(filestr,"__lua__")
 	if not luastr then
-		printh "missing section: __lua__"
-		return
-	end
-	local tabs = {}
-	local ri = 1 --read index
-	for _=0,100 do -- should be 16 tabs max? 100 to be safe
-		local i0,i1 = luastr:find("\n-->8\n",ri,true) -- true: don't activate "a-" pattern recognition -- TODO check for CRLF?
-		if i0 then
-			add(tabs,luastr:sub(ri,i0-1)) -- found a tab, extract it
-			ri = i1+1
-		else
-			add(tabs,luastr:sub(ri)) -- extract last tab
-			break
+		printh "parse_p8_lua: skipping missing section: __lua__"
+	else
+		local ri = 1 --read index
+		for _=0,100 do --should be 16 tabs max? 100 to be safe
+			local i0,i1 = luastr:find("\n-->8\n",ri,true) --true=exact match (don't activate "a-" lua pattern)
+			if i0 then
+				add(tabs,luastr:sub(ri,i0-1)) --found a tab, extract it
+				ri = i1+1
+			else
+				add(tabs,luastr:sub(ri)) --extract last tab
+				break
+			end
 		end
 	end
 	return tabs
@@ -70,8 +71,9 @@ function parse_p8_gfx(filestr)
 	local hexdata = p8_section_extract(filestr,"__gfx__")
 	if not hexdata then
 		printh "missing section: __gfx__"
-		return
+		return userdata("u8",128,128)
 	end
+
 	hexdata = hexdata:gsub("\n", "")
 	hexdata = rpad(hexdata,"0",128*128)
 	return userdata("[gfx]8080"..hexdata.."[/gfx]")
@@ -83,6 +85,7 @@ function parse_p8_gff(filestr)
 	if not hexdata then
 		return userdata("u8",256)
 	end
+
 	hexdata = hexdata:gsub("\n", "")
 	hexdata = rpad(hexdata,"0",256)
 	return userdata("u8",256,hexdata)
@@ -90,47 +93,46 @@ end
 
 -- returns a userdata holding the map
 function parse_p8_map(filestr)
-	local mapdata = p8_section_extract(filestr,"__map__")
-	if not mapdata then
-		printh "missing section: __map__"
-		-- TODO techincally this is returning too early b/c map could be only on bottom half
-		-- but no thanks, the code complexity is not worth it. that just wont work in this tool
-		return
-	end
-	mapdata = mapdata:gsub("\n", "")
-
-	local gfxdata = p8_section_extract(filestr,"__gfx__")
-	if not gfxdata then
-		printh "(parse_p8_map) missing section: __gfx__"
-		return
-	end
-	gfxdata = split(gfxdata,"\n",false) -- NOTE: array of lines
-
 	-- bmp holds i16s: ?({fetch("/ram/cart/map/0.map")[1].bmp:attribs()})[3]
 	-- they're more than just u8 b/c tile flipping is supported (what else?)
 	local w,h = 128,64
 	local ud = userdata("i16",w,h)
-	for i=0,#mapdata/2-1 do
-		local x,y = i%w,i\w
-		if x<w and y<h then
-			local n1 = num_from_hex(sub(mapdata,i*2+1,i*2+1))
-			local n2 = num_from_hex(sub(mapdata,i*2+2,i*2+2))
-			ud:set(x,y,n1*16+n2)
+
+	local mapdata = p8_section_extract(filestr,"__map__")
+	if not mapdata then
+		printh "parse_p8_map: skipping missing section: __map__"
+	else
+		mapdata = mapdata:gsub("\n", "")
+
+		for i=0,#mapdata/2-1 do
+			local x,y = i%w,i\w
+			if x<w and y<h then
+				local n1 = num_from_hex(sub(mapdata,i*2+1,i*2+1))
+				local n2 = num_from_hex(sub(mapdata,i*2+2,i*2+2))
+				ud:set(x,y,n1*16+n2)
+			end
 		end
 	end
-	
-	-- extract rest of map from sprites
-	for i=65,#gfxdata do
-		local ln = gfxdata[i]
-		for j=0,#ln/2-1 do
-			local n1 = num_from_hex(sub(ln,j*2+1,j*2+1))
-			local n2 = num_from_hex(sub(ln,j*2+2,j*2+2))
-			local tile = n2*16+n1
-			local x,y = j + (i&1==1 and 0 or 64), (i-1)\2
-			ud:set(x,y,tile)
+
+	local gfxdata = p8_section_extract(filestr,"__gfx__")
+	if not gfxdata then
+		printh "parse_p8_map: skipping missing section: __gfx__"
+	else
+		gfxdata = split(gfxdata,"\n",false) -- NOTE: array of lines
+		
+		-- extract rest of map from sprites
+		for i=65,#gfxdata do
+			local ln = gfxdata[i]
+			for j=0,#ln/2-1 do
+				local n1 = num_from_hex(sub(ln,j*2+1,j*2+1))
+				local n2 = num_from_hex(sub(ln,j*2+2,j*2+2))
+				local tile = n2*16+n1
+				local x,y = j + (i&1==1 and 0 or 64), (i-1)\2
+				ud:set(x,y,tile)
+			end
 		end
 	end
-	
+
 	return ud
 end
 
