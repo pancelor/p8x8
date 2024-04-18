@@ -29,6 +29,26 @@ These areas will likely remain incompatible, and will require changes to get a c
 
 These areas will hopefully become compatible in the future. For now, they require changes to get a cart working in Picotron:
 
-- [custom fonts](https://github.com/pancelor/p8x8/issues/4) don't seem to work, I suspect the data format may be different?
 - top-level local variables are not visible across different tabs. this can be changed inside main.lua of p8x8's output, but it will lead to worse error messages. I recommend making top-level locals global instead.
 - [pausing the game](https://github.com/pancelor/p8x8/issues/7) is a bit awkward -- menuitems show up in the window's menu, but PICO-8's ingame pause menu is not supported. When the window loses focus it will pause automatically (configurable -- see `pause_when_unfocused` inside main.lua in your exported cart)
+
+### Custom fonts
+
+Custom fonts are supported by p8x8 (and Picotron) -- poke your font data to 0x5600 (just like PICO-8) and things should work.
+
+However, Picotron can't handle the non-ascii characters that PICO-8 uses, so you'll need to re-encode your font if you used P8SCII characters to set it up
+(something like `?"⁶!5600⁸⁸\n\0\0\0\0\0\0\0\0...ᶜᵉᶜᶜᶜ゛\0\0..."` or the equivalent `poke(0x5600,ord("...",len))`)
+
+To re-encode your font:
+
+1. Open PICO-8, and open the .p8 file. Find the part of the code that sets up the font -- search for "0x5600", "5600", or "22016".
+1. Immediately after the code that pokes the font data into memory, add this code:
+```lua
+local data='poke(unpack(split\"0x5600'
+for addr=0x5600,0x5dff do  data..=","..@addr  end
+printh(data..'"))',"@clip")
+stop("copied")
+```
+1. Run the cart. It should stop early and print "copied".
+1. Delete the existing font setup code and replace it with the generated code on your clipboard. It should look like this: `poke(unpack(split" <lots of numbers here> "))`
+1. Save your .p8 cart. The font setup code now sets up the same font, but only uses ascii characters, so it will now work with p8x8.

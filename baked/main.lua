@@ -27,9 +27,9 @@ if pause_when_unfocused then
 	on_event("gained_focus", function() has_focus = true end)
 end
 
---swap fonts (see /system/lib/head.lua)
-poke(0x5f56, 0x56) -- primary font - p8.font
-poke(0x5f57, 0x40) -- secondary font - lil.font
+-- set pico8 font as default
+-- the alternate font is already set to p8.font (see /system/lib/head.lua)
+poke(0x4000,get(fetch"/system/fonts/p8.font"))
 
 
 
