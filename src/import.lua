@@ -107,8 +107,8 @@ function parse_p8_map(filestr)
 		for i=0,#mapdata/2-1 do
 			local x,y = i%w,i\w
 			if x<w and y<h then
-				local n1 = num_from_hex(sub(mapdata,i*2+1,i*2+1))
-				local n2 = num_from_hex(sub(mapdata,i*2+2,i*2+2))
+				local n1 = num_from_hex(mapdata,i*2+1)
+				local n2 = num_from_hex(mapdata,i*2+2)
 				ud:set(x,y,n1*16+n2)
 			end
 		end
@@ -124,8 +124,8 @@ function parse_p8_map(filestr)
 		for i=65,#gfxdata do
 			local ln = gfxdata[i]
 			for j=0,#ln/2-1 do
-				local n1 = num_from_hex(sub(ln,j*2+1,j*2+1))
-				local n2 = num_from_hex(sub(ln,j*2+2,j*2+2))
+				local n1 = num_from_hex(ln,j*2+1)
+				local n2 = num_from_hex(ln,j*2+2)
 				local tile = n2*16+n1
 				local x,y = j + (i&1==1 and 0 or 64), (i-1)\2
 				ud:set(x,y,tile)
@@ -135,6 +135,70 @@ function parse_p8_map(filestr)
 
 	return ud
 end
+
+-- untested
+function parse_p8_sfx(filestr)
+	local sfxdata = p8_section_extract(filestr,"__sfx__")
+	local ud = userdata("u8",0x30000)
+ 
+	if not sfxdata then
+		printh "parse_p8_sfx: skipping missing section: __sfx__"
+	else
+		sfxdata = split(sfxdata,"\n",false) -- NOTE: array of lines
+
+		for i,ln in ipairs(sfxdata) do
+			assert(#ln==168,"sfx line in p8 file has wrong character length: "..#ln)
+			for x=1,8 do
+				-- TODO: ????AABB A/B are the loop params. view is set in there I think - tracker v. drawmode
+				-- num_from_hex(ln,x)
+			end
+			for ni=0,31 do --note index
+				local aa,bb,cc,dd,ee = num_from_hex(ln,9+ni*5),num_from_hex(ln,9+ni*5+1),num_from_hex(ln,9+ni*5+2),num_from_hex(ln,9+ni*5+3),num_from_hex(ln,9+ni*5+4)
+				local pitch = (aa&0x3)<<4 | bb
+				local waveform = cc&0x7 -- drop custom_wv data
+				local custom_wv = cc>>3 -- 0 or 1
+				local volume = dd
+				local effect = ee
+
+				-- TODO https://github.com/pancelor/p8x8/issues/5
+
+				-- > volume: 1-7 in pico-8 correspond to 8,10,18,20,28,30,38 in picotron
+				-- > pitch: octaves 0-5 in pico-8 seem to correspond to 2-7 in picotron
+
+				-- effects: https://www.lexaloffle.com/dl/docs/picotron_synth.html#Effect_Commands
+
+				--[[
+					-- picotron .sfx format:
+					mysfx=fetch"/ram/cart/sfx/0.sfx"
+					?type(mysfx)
+					--userdata
+					?qq(mysfx:attribs())
+					--196608 1 u8 1
+					--196608==0x30000
+					--https://www.lexaloffle.com/dl/docs/picotron_synth.html#Memory_Layout
+				--]]
+			end
+		end
+	end
+
+	return ud
+end
+
+--[[
+x = 0
+for b in bytes(clean[:8]):
+    cart.rom.set8(mem_sfx_info_addr(y, x), b)
+    x += 1
+x = 0
+for bph, bpl, bw, bv, be in nybble_groups(clean[8:], 5):
+    if x < 0x20:
+        value = bpl | ((bph & 0x3) << 4) | ((bw & 0x7) << 6) | ((bv & 0x7) << 9) | ((be & 0x7) << 12) | ((bw & 0x8) << 12) 
+        cart.rom.set16(mem_sfx_addr(y, x), value)
+        x += 1
+y += 1
+--]]
+
+
 
 -- returns the contents of a pico8 file section (e.g. __gfx__)
 -- returns the entire string, with newlines and all

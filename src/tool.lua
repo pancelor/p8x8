@@ -6,7 +6,7 @@ function test(want,got)
 end
 
 -- 0=>"0", ... 15=>"f", 16=>"g", ... 31=>"v"
-local function hex_from_num(val)
+function hex_from_num(val)
 	if 0<=val and val<=9 then
 		return string.char(0x30+val)
 	elseif 10<=val and val<=31 then
@@ -20,19 +20,20 @@ end
 --test("h",hex_from_num(17))
 
 -- "0"=>0, ... "f"=>15, "g"=>16, ... "v"=>31
-function num_from_hex(char)
-	local val = string.byte(char)
+function num_from_hex(str, i)
+	local val = string.byte(str,i)
 	if 0<=val-0x30 and val-0x30<=9 then
 		return val-0x30
 	elseif 10<=val-97+10 and val-97+10<=31 then
 		return val-97+10
 	else
-		assert(nil,"num_from_hex bad input: "..tostr(char))
+		assert(nil,"num_from_hex bad input: "..tostr(str).." "..tostr(i))
 	end
 end
 --test(3,num_from_hex("3"))
 --test(15,num_from_hex("f"))
 --test(17,num_from_hex("h"))
+--test(12,num_from_hex("abc",-1))
 
 function rstrip(str,chars)
 	local book = {}

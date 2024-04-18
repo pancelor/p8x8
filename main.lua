@@ -26,7 +26,7 @@ include "src/export.lua"
 
 function _init()
 	reset_state() --set up the window
-	pqn("hello!")
+	
 	menuitem{
 		id = "clear",
 		label = "\^:0f19392121213f00 Clear",
