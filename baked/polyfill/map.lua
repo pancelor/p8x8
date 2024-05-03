@@ -18,6 +18,7 @@ end
 reload_map()
 
 if not _map then
+	-- technically not quite right; some carts may entirely generate their own map
 	function p8env.mget() end
 	function p8env.mset() end
 	function p8env.map() end
@@ -47,8 +48,8 @@ function p8env.map(celx,cely, sx,sy, celw,celh, flags)
 	celh = celh or 64
 	
 	-- TODO: speed: dont draw off-camera
-	-- local cam_x,cam_y = peek4(0x5510,2)
-	-- local x0,y0 = (camx-sx)\8,(camy-sy)\8 --?
+	local cam_x,cam_y = peek4(0x5510,2)
+	-- local tx0,ty0 = (camx-sx)\8,(camy-sy)\8
 	-- camera(camx-sx,camy-sy)
 
 	local _mget,fget,spr = p8env.mget,fget,spr
@@ -56,7 +57,7 @@ function p8env.map(celx,cely, sx,sy, celw,celh, flags)
 		for dy=0,celh-1 do
 			for dx=0,celw-1 do
 				local tile = _mget(celx+dx,cely+dy)
-				if tile!=0 and fget(tile)&flags==flags then
+				if tile!=0 and fget(tile)&flags>0 then --do any flags match?
 					spr(tile,sx+dx*8,sy+dy*8)
 				end
 			end
@@ -76,8 +77,12 @@ end
 p8env.mapdraw = p8env.map
 
 function p8env.tline(x0,y0,x1,y1,mx,my, mdx,mdy)
-	compat("TODO: basic tline support") --https://github.com/pancelor/p8x8/issues/8
-	-- return tline3d(_map,?)
+	compat("TODO: tline() support. currently implementation is likely wrong and will change") --https://github.com/pancelor/p8x8/issues/8
+
+	-- this is untested and probably wrong
+	local u0,v0,u1,v1 = mx,my,mdx,mdy
+	return tline3d(_map, x0, y0, x1, y1, u0, v0, u1, v1)
+
 	--[[
 	http://pico8wiki.com/index.php?title=Tline
 	https://www.lexaloffle.com/dl/docs/picotron_gfx_pipeline.html#tline3d
@@ -89,5 +94,5 @@ function p8env.tline(x0,y0,x1,y1,mx,my, mdx,mdy)
 		w is 1/z, useful for perspective-correct texture mapping
 		u,v should be given as u/z and v/z
 		when w0 and w1 are both 1 (the default), tline3d is linear
-	]]	
+	]]
 end
