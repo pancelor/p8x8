@@ -1,8 +1,14 @@
 --[[pod_format="raw",created="2024-03-20 01:24:07",modified="2024-04-03 21:56:20",revision=500]]
--- TODO: better font detection
--- show replacement code in the warning itself?
--- at least link to the font re-encoding snippet (https://github.com/pancelor/p8x8/blob/main/compat.md#custom-fonts)
--- TODO? limit symbol warning spam; e.g. only show one symbol warning per line. or hard cap after 50?
+--[[
+TODO:
+- better font detection
+	show replacement code in the warning itself?
+	at least link to the font re-encoding snippet (https://github.com/pancelor/p8x8/blob/main/compat.md#custom-fonts)
+- limit symbol warning spam; e.g. only show one symbol warning per line. or hard cap after 50?
+	should maybe process each line in order, rather than each rules in order...
+	would allow more smarts, e.g. "this looks like a font, please use this instead: <generated code>"
+	would running a bunch of regexes per-line be slower? yes. hmm
+]]
 
 -- returns success
 function process_code(cart)

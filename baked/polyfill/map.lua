@@ -12,8 +12,15 @@ end
 reload_map()
 -- poke(0x5f36,@0x5f36 & ~0x8) -- don't draw sprite 0
 
-p8env.mget=mget
-p8env.mset=mset
+function p8env.mget(x,y)
+	return (mget(x,y) or 0)&255
+end
+
+function p8env.mset(x,y,val)
+	-- &255: tested in p8 with: mset(0,0,700)?mget(0,0)
+	mset(x,y,(tonum(val) or 0)&255)
+end
+
 p8env.map=map
 p8env.mapdraw=map
 

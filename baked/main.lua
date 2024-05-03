@@ -1,10 +1,14 @@
 --[[pod_format="raw",created="2024-03-19 09:34:40",modified="2024-04-03 21:56:20",revision=590]]
+local _compat_seen = {}
 function compat(msg)
 	-- this function runs every time the translation layer notices possible compatibility issues
 	-- currently, it prints to the host console, but you could do something else here if you want
-	msg = "COMPAT: "..msg
-	printh(msg)
---	notify(msg)
+	if not _compat_seen[msg] then
+		_compat_seen[msg] = true --only show once
+		msg = "COMPAT: "..msg
+		printh(msg)
+--		notify(msg)
+	end
 --	assert(false,msg)
 end
 

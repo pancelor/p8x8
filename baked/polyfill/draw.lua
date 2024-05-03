@@ -45,7 +45,9 @@ function p8env.pal(...)
 		-- fallthrough
 	end
 
-	if c1&15~=c1 then
+	if c1==nil then
+		c1 = 0
+	elseif c1&15~=c1 then
 		c1 = (c1&15)|48 --rebase secret colors to 48
 	end
 	return pal(c0,c1,p)

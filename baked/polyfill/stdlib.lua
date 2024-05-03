@@ -10,10 +10,14 @@
 function p8env.srand(seed)
 	-- srand truncates its input to an int now,
 	-- so... shift the seed 16 bits left
-	return srand(seed*65536)
+	return srand(seed*0x10000)
 end
 function p8env.rnd(mult)
-	return rnd(tonum(mult)) --make rnd"100" work
+	if type(mult)=="string" then
+		return rnd(tonum(mult)) --rnd"100"
+	else
+		return rnd(mult) --rnd(100) or rnd{2,5}
+	end
 end
 
 p8env.abs=abs
