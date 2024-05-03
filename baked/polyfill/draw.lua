@@ -7,7 +7,49 @@ function p8env.print(...)
 	return print(...)
 end
 
-p8env.pal=pal --COMPAT: not quite the same. might need some checks for pal({},1) etc
+-- https://lospec.com/palette-list/pico-8-secret-palette
+poke4(0x5000+48*4, --set pal 48-63 to the p8 "secret colors"
+	0x291814, 0x111d35, 0x422136, 0x125359,
+	0x742f29, 0x49333b, 0xa28879, 0xf3ef7d,
+	0xbe1250, 0xff6c24, 0xa8e72e, 0x00b543,
+	0x065ab5, 0x754665, 0xff6e59, 0xff9d81)
+
+function p8env.pal(...)
+	--COMPAT: not well-tested yet. pal()/pal(0)/pal(1) in particular
+	local c0,c1,p
+	local nargs = select("#",...)
+	if nargs==0 then
+		-- reset palettes
+		return pal()
+	elseif nargs==1 then
+		-- reset given palette
+		p = select(1,...)
+		return pal(p)
+	elseif nargs==2 then
+		c0, c1 = select(1,...)
+		if type(c0)=="table" then
+			p = c1
+			c1 = nil
+			for k,v in pairs(c0) do
+				if v&15~=v then
+					c0[k] = (v&15)|48 --rebase secret colors to 48
+				end
+			end
+			return pal(c0,p)
+		else
+			p = 0
+			-- fallthrough
+		end
+	elseif nargs==3 then
+		c0, c1, p = select(1,...)
+		-- fallthrough
+	end
+
+	if c1&15~=c1 then
+		c1 = (c1&15)|48 --rebase secret colors to 48
+	end
+	return pal(c0,c1,p)
+end
 function p8env.palt(...)
 	if select("#",...)==0 then
 		-- no args = reset

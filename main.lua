@@ -3,6 +3,7 @@ printh"---"
 
 
 dev = fstat"/ram/devmode.txt" and env().corun_program
+-- dev_import_filename = dev and "/desktop/p8/secretpal_test.p8"
 -- dev_export_filename = dev and "/desktop/temp.p64"
 
 
@@ -41,9 +42,10 @@ function _init()
 			real_intention="import_p8"
 			create_process("/system/apps/filenav.p64", {
 				path="/desktop",
+				-- open_with = env().prog_name, --this just launches a new p8x8 window; no good
 				intention="save_file_as", -- TODO: I'd rather use "open_file" but the filesystem doesn't let me process the file -- it tries to literally open it (and fails b/c it doesn't know how to open a .p8)
 				window_attribs={workspace="current", autoclose=true},
-				--use_ext="p8",
+				-- use_ext="p8", --?
 			})
 		end,
 	}
@@ -57,6 +59,11 @@ function _init()
 	-- edit palette (bg checkboard)
 	pal(0x20,0x1a1520,2)
 	pal(0x21,0x0f0415,2)
+
+	local import_filename = env().argv[1] or dev_import_filename
+	if import_filename then
+		import_p8(import_filename)
+	end
 end
 
 function _update()
@@ -129,10 +136,6 @@ on_event("drop_items",function(msg)
 		notify(err)
 	end
 end)
-
---on_event("open_file",function(...)
---	pqn(...)
---end)
 
 ---------------
 

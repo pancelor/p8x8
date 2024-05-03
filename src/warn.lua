@@ -1,4 +1,9 @@
 --[[pod_format="raw",created="2024-03-20 01:24:07",modified="2024-04-03 21:56:20",revision=500]]
+-- TODO: better font detection
+-- show replacement code in the warning itself?
+-- at least link to the font re-encoding snippet (https://github.com/pancelor/p8x8/blob/main/compat.md#custom-fonts)
+-- TODO? limit symbol warning spam; e.g. only show one symbol warning per line. or hard cap after 50?
+
 -- returns success
 function process_code(cart)
 	local tabs = cart.lua
@@ -19,7 +24,7 @@ function process_code(cart)
 	if #warns>0 then
 		sort_shell(warns) --major will be first, nice
 		cart.lua_warn = table.concat(warns,"\n")
-		notify_printh(string.format("(%d more) %s",#warns,warns[1]))
+		notify_printh(string.format("(%d more) %s",#warns,warns[1])) -- BUG: this is stomped on by "imported!" in import_p8()
 	end
 	return true
 end
@@ -48,7 +53,7 @@ function lineno_lookup(lineno,index)
 end
 
 local function _lint_find(src,res,lvl,substr,plain,msg)
-	local ri=1
+	local ri = 1
 	for i=1,100 do --sentinel
 		local i0,i1 = string.find(src,substr,ri,plain)
 		if not i0 then
@@ -78,6 +83,7 @@ function lint_all(src)
 	_lint_pattern(src,res,1,"[%d]then[^%w]",[[numbers into keywords need whitespace; e.g. "99then" => "99 then"]])
 	_lint_pattern(src,res,1,"[%d]and[^%w]",[[numbers into keywords need whitespace; e.g. "99and" => "99 and"]])
 	_lint_pattern(src,res,1,"[%d]or[^%w]",[[numbers into keywords need whitespace; e.g. "99or" => "99 or"]])
+	_lint_pattern(src,res,1,"[%d]if[^%w]",[[numbers into keywords need whitespace; e.g. "99if" => "99 if"]])
 	_lint_pattern(src,res,1,"[^<>]>>>[^<>]",[[lshr (>>>) is not supported]])
 	_lint_pattern(src,res,1,"[^<>]<<>[^<>]",[[rotl (>>>) is not supported]])
 	_lint_pattern(src,res,1,"[^<>]>><[^<>]",[[rotr (>>>) is not supported]])

@@ -1,7 +1,11 @@
 --[[pod_format="raw",created="2024-03-19 02:49:51",modified="2024-04-03 21:56:10",revision=858]]
 function import_p8(path)
 	local ext = path:ext()
-	if ext != "p8" then
+	if fstat(path)~="file" then
+		notify_printh(string.format("*error: can't find file '.%s'",path))
+		return
+	end
+	if ext~="p8" then
 		notify_printh(string.format("*error: want a '.p8' file, got '.%s'",ext))
 		return
 	end
@@ -176,6 +180,9 @@ function parse_p8_sfx(filestr)
 					--196608 1 u8 1
 					--196608==0x30000
 					--https://www.lexaloffle.com/dl/docs/picotron_synth.html#Memory_Layout
+
+					-- see sfx.p64/data.lua -- layout looks straightforward/documented enough to be usable
+					-- https://www.lexaloffle.com/bbs/?pid=visitrack#p might also have insights
 				--]]
 			end
 		end
