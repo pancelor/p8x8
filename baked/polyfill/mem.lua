@@ -18,49 +18,86 @@ p8env.poke=mem_warn("poke",poke)
 p8env.poke2=mem_warn("poke2",poke2)
 p8env.poke4=mem_warn("poke4",poke4)
 
-local _cartdata
+
+
+-- TODO: 0x5e00 claims its still "persistent cart data":
+-- https://www.lexaloffle.com/dl/docs/picotron_gfx_pipeline.html
+-- A basic check shows no magic persistence, but that memory might be unused and available
+-- Maybe use that as backing store, instead of cartdata_cache? wish I could memmap() it
+
+local cartdata_path -- file path where cartdata is stored
+local cartdata_cache -- cached data in RAM, for speed. flushed once a frame
+local cartdata_dirty = false -- did the cache change in the last frame?
 function p8env.cartdata(name)
-	assert(not _cartdata,"cartdata() can only be called once")
-	_cartdata = name:gsub("[^%w]","_")
-	if #_cartdata==0 then
-		_cartdata = nil
+	assert(not cartdata_path,"cartdata() can only be called once")
+	name = name:gsub("[^%w]","_")
+	if #name==0 then
+		name = nil
 		return
 	end
-	mkdir("/appdata/".._cartdata)
-	if not fstat("/appdata/".._cartdata.."/cartdata.pod") then
-		local dat = userdata("i32",64) --initialized to 0
-		store("/appdata/".._cartdata.."/cartdata.pod",dat)
+
+	--[[
+	-- If you're growing your p8x8 cart into a full picotron program,
+	-- make your own folder and store whatever you want there! like this:
+	mkdir("/appdata/"..name)
+	cartdata_path = "/appdata/p8x8/"..name.."/cartdata.pod"
+	--]]
+
+	-- [[
+	--make sure folder exists
+	mkdir("/appdata/p8x8/")
+	mkdir("/appdata/p8x8/cartdata")
+	cartdata_path = "/appdata/p8x8/cartdata/"..name..".pod"
+	--]]
+
+	cartdata_cache = fetch(cartdata_path) --maybe nil
+	if cartdata_cache then
+		local w,h,typ,dim = cartdata_cache:attribs()
+		if not (w==64 and h==1 and typ=="i32" and dim==1) then
+			cartdata_cache = nil
+			printh"bad cartdata stored on disk; clearing to 0"
+		end
+	end
+	if not cartdata_cache then
+		cartdata_cache = userdata("i32",64) --initialized to 0
+		cartdata_dirty = true
 	end
 end
 function p8env.dget(slot)
-	if not _cartdata then return 0 end
-
-	local dat = fetch("/appdata/".._cartdata.."/cartdata.pod")
-	local w,h,typ,dim = dat:attribs()
-	assert(w==64 and h==1 and typ=="i32" and dim==1,qq(w,h,typ,dim))
+	if not cartdata_path then return 0 end
 
 	slot = ((tonumber(slot) or 0)\1)&63
-	local bigval = dat[slot]
-	if bigval&65535==0 then
+	local bigval = cartdata_cache[slot]
+	-- bigval is an i32 (0xAAAABBBB); now convert it to a pico-8-like decimal (0xAAAA.BBBB)
+	-- this is good enough
+	if bigval&0xffff==0 then
 		-- no decimals stored
 		-- (string concat behaves differently depending on whether this division is \ or /,
-		--   and bigval/65536\1 doesn't even force it back to intyness?? it's wild.
-		--   this mainly matters for score display)
-		return bigval\65536
+		--   I guess lua keeps tracks of numbers as being either ints or floats.
+		--   and bigval/0x10000\1 doesn't force a float back into intyness?? wild.
+		--   this mainly matters for score display -- see cherrybomb)
+		return bigval\0x10000
 	else
-		return bigval/65536
+		return bigval/0x10000
 	end
 end
 function p8env.dset(slot,val)
-	if not _cartdata then return end
-
-	local dat = fetch("/appdata/".._cartdata.."/cartdata.pod")
-	local w,h,typ,dim = dat:attribs()
-	assert(w==64 and h==1 and typ=="i32" and dim==1)
+	if not cartdata_path then return end
 
 	slot = ((tonumber(slot) or 0)\1)&63
-	dat[slot] = (tonumber(val) or 0)*65536 --store val (float) as 32 bits of integer
-	store("/appdata/".._cartdata.."/cartdata.pod",dat)
+	cartdata_cache[slot] = (tonumber(val) or 0)*0x10000 --store val (float) as 32 bits of integer
+	cartdata_dirty = true
+end
+--called at the end of each frame
+function cartdata_flush()
+	if not cartdata_path then return end
+	
+	if cartdata_dirty then
+		-- local a = stat(1)
+		store(cartdata_path,cartdata_cache)
+		cartdata_dirty = false
+		-- pqn(stat(1)-a) -- takes about 0.005
+	end
 end
 
 function p8env.reload(dest_addr,src_addr,len, filename)

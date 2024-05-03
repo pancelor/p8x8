@@ -10,12 +10,12 @@ end
 
 
 
--- to run fullscreen with a border, change to true.
--- to draw a border image, use this tool to create a new
---   spritesheet saved at gfx/border.gfx,
---   where sprite 0 is a 480x270 sprite:
---   https://www.lexaloffle.com/bbs/?pid=importpng#p
+-- to run fullscreen with a border, set "fullscreen = true" instead.
 local fullscreen = false
+-- to draw a border image, create a new spritesheet in the gfx editor,
+--   save it as gfx/border.gfx, and store a 480x270 sprite in sprite 1
+-- this tool can help you convert PNG files to picotron:
+--   https://www.lexaloffle.com/bbs/?pid=importpng#p
 
 local pause_when_unfocused = true
 
@@ -106,6 +106,8 @@ if fullscreen then
 		
 		local x,y = winw/2-64,winh/2-64
 		blit(p8canvas,get_draw_target(),0,0,x,y)
+		
+		cartdata_flush()
 	end
 else
 	-- windowed
@@ -123,6 +125,8 @@ else
 		
 		-- can't set directly b/c cart might change _draw midgame
 		if p8env._draw then p8env._draw() end
+
+		cartdata_flush()
 	end
 end
 
