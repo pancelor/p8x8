@@ -17,6 +17,7 @@ The goal here is not to perfectly emulate PICO-8 -- instead, the tool attempts t
 - [USAGE GUIDE](#usage-guide)
   - [Quickstart](#quickstart)
   - [Compatibility](#compatibility)
+  - [Symbols](#symbols)
   - [Photosensitivity warning](#photosensitivity-warning)
   - [License](#license)
 - [Details, more info](#details-more-info)
@@ -32,13 +33,16 @@ The goal here is not to perfectly emulate PICO-8 -- instead, the tool attempts t
 
 ## Quickstart
 
-- Put p8x8 and your PICO-8 cartridge into Picotron's filesystem
+- Install p8x8 into your Picotron
+	- `load #p8x8`
+	- `save /desktop/p8x8`
+- Put your PICO-8 cartridge into Picotron's filesystem
 	- Type `folder` in the Picotron terminal to open the current folder using your host OS
-- Inside Picotron, `load p8x8` then ctrl-r to run
+- Inside Picotron, `load p8x8` and ctrl-r to run
 - Drag mygame.p8 onto the p8x8 window
 - Press the export button
-	- A notepad will likely open up, showing the warnings that p8x8 generated. Manually change your p8 file, reimport and export
-	- The warning system might report warnings for things you've already fixed, or for things that aren't a problem (like code inside comments). For a list of the problems it looks for, see `function lint_all` in [warn.lua](https://github.com/pancelor/p8x8/blob/main/src/warn.lua#L74-L89)
+	- A notepad will likely open up, showing the warnings that p8x8 generated. Manually change your p8 file, reimport and export. See [doc/compat.md](./doc/compat.md) for more info.
+	- 
 - Double-click the exported cart to run it!
 	- `load mygame.p64` and check out `main.lua` for more info/options
 
@@ -51,11 +55,15 @@ Not everything will work. This tool is designed to give you a starting point, an
 2. **numbers** -- Picotron uses a 64-bit float numeric type, while PICO-8 uses 16.16 fixed-point numbers. Anything relying on the exact format of PICO-8 numbers (e.g. bitwise operators) will probably have problems.
 3. **sfx/music** - this is not supported [yet](https://github.com/pancelor/p8x8/issues/5).
 
-For more notes, see [compat.md](./compat.md)
+For more notes, see [compat.md](./doc/compat.md)
+
+## Symbols
+
+You will likely need to make changes related to PICO-8's special symbols. For instance, you will need to change `btnp(⬇️)` to `btnp(p8x8_symbol"⬇️")` or `btnp(3)`. For much more info, including custom fonts, see [doc/symbols.md](./doc/symbols.md)
 
 ## Photosensitivity warning
 
-~~Carts that change the palette may flash rapidly.~~ This seems fixed as of Picotron 0.1.0e! But it seems worth noting still. Use at your own risk, and test your converted carts before distributing them.
+~~Carts that change the palette may rapidly flash the colors on the Picotron desktop.~~ This seems fixed as of Picotron 0.1.0e! But it seems worth noting still. Use at your own risk, and test your converted carts before distributing them.
 
 ## License
 

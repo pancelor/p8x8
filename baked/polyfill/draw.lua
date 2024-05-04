@@ -7,50 +7,49 @@ function p8env.print(...)
 	return print(...)
 end
 
--- https://lospec.com/palette-list/pico-8-secret-palette
-poke4(0x5000+48*4, --set pal 48-63 to the p8 "secret colors"
-	0x291814, 0x111d35, 0x422136, 0x125359,
-	0x742f29, 0x49333b, 0xa28879, 0xf3ef7d,
-	0xbe1250, 0xff6c24, 0xa8e72e, 0x00b543,
-	0x065ab5, 0x754665, 0xff6e59, 0xff9d81)
-
+-- to read the i-th pal(0) entry, use `p64env.peek(0x8000+i*0x40)&0xf` instead of `peek(0x5f00+i)`
+-- to read the i-th pal(1) entry, use `p64env.peek(0x5480+i)` instead of `peek(0x5f10+i)`
 function p8env.pal(...)
 	--COMPAT: not well-tested yet. pal()/pal(0)/pal(1) in particular
 	local c0,c1,p
 	local nargs = select("#",...)
 	if nargs==0 then
 		-- reset palettes
-		return pal()
+		pal(0)
+		pal(1)
+		return
 	elseif nargs==1 then
-		-- reset given palette
-		p = select(1,...)
-		return pal(p)
+		-- reset palette
+		return pal(...)
 	elseif nargs==2 then
-		c0, c1 = select(1,...)
+		c0,c1 = select(1,...)
 		if type(c0)=="table" then
 			p = c1
 			c1 = nil
 			for k,v in pairs(c0) do
-				if v&15~=v then
-					c0[k] = (v&15)|48 --rebase secret colors to 48
+				if v&0xf~=v then
+					c0[k] = (v&0xf)|48 --rebase secret colors to 48
 				end
 			end
+			if p==2 then compat("pal(2) is not supported") end
 			return pal(c0,p)
 		else
 			p = 0
 			-- fallthrough
 		end
-	elseif nargs==3 then
+	elseif nargs>=3 then
 		c0, c1, p = select(1,...)
 		-- fallthrough
 	end
 
 	if c1==nil then
 		c1 = 0
-	elseif c1&15~=c1 then
-		c1 = (c1&15)|48 --rebase secret colors to 48
+	elseif c1&0xf~=c1 then
+		c1 = (c1&0xf)|48 --rebase secret colors to 48
 	end
+	if p==2 then compat("pal(2) is not supported") end
 	return pal(c0,c1,p)
+	--COMPAT: p8's pal returns the old value, but picotron's (and p8x8's) does not.
 end
 function p8env.palt(...)
 	if select("#",...)==0 then
@@ -67,6 +66,7 @@ p8env.camera=camera
 --[[
 local p8camx,p8camy = 0,0
 function p8env.camera(x,y)
+	-- cam_x,cam_y=peek4(0x5510,2) --camera
 	local oldx,old = p8camx,p8camy
 	p8camx,p8camy = ((x or 0)\1)&65535,((y or 0)\1)&65535
 	camera(p8camx,p8camy)

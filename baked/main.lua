@@ -78,6 +78,17 @@ end
 -- init/update/draw
 --------------------------------
 
+function p8x8_init()
+	-- https://lospec.com/palette-list/pico-8-secret-palette
+	poke4(0x5000+48*4, --set pal 48-63 to the p8 "secret colors"
+		0x291814, 0x111d35, 0x422136, 0x125359,
+		0x742f29, 0x49333b, 0xa28879, 0xf3ef7d,
+		0xbe1250, 0xff6c24, 0xa8e72e, 0x00b543,
+		0x065ab5, 0x754665, 0xff6e59, 0xff9d81)
+
+	if p8env._init then p8env._init() end
+end
+
 local p8x8_draw
 if fullscreen then
 	local p8canvas = userdata("u8",128,128)
@@ -148,7 +159,7 @@ if p8env._update then
 	end
 	--]]
 
-	_init=p8env._init
+	_init=p8x8_init
 	local showframe=false
 	function _update()
 		if not has_focus then return end
@@ -169,7 +180,7 @@ if p8env._update then
 		end
 	end
 else
-	_init=p8env._init
+	_init=p8x8_init
 	function _update()
 		if not has_focus then return end
 
