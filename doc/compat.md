@@ -32,6 +32,7 @@ These areas will likely remain incompatible, and will require changes to get a c
 - `x = 13//2` -- two slashes now means "floor division", not the start of a comment. In PICO-8, this would set x to 13, but in Picotron, x gets set to 6.
 - you can only draw inside the `_draw` function ([explanation](https://github.com/pancelor/p8x8/issues/9#issuecomment-2029468833))
 	- carts that use `goto` loops are not supported
+- `pal(2)` is unsupported - it's very complicated. But these effects can be done using Picotron's API (instead of p8x8's API); for more info see [colors.md](./colors.md)
 
 ### Todo
 

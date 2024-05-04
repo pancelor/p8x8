@@ -41,11 +41,11 @@ poke(0x4000,get(fetch"/system/fonts/p8.font"))
 -- load p8code in a sandbox
 --------------------------------
 
+-- the enviroment that the pico8 code will see as its "global" environment
 p8env = {
-	p64env=_ENV, --upgrade path to picotron api
+	p64env=_ENV, --upgrade path to picotron api. e.g. a p8x8 cart can call `p64env.fetch()` to acess Picotron's fetch() function
 }
---the global enviroment the pico8 code will have access to
--- members are set by these polyfills:
+-- these files set up the other members of p8env (pal(), spr(), tostr(), poke(), everything else):
 for name in all(ls("./polyfill")) do
 	include("./polyfill/"..name)
 end
@@ -137,7 +137,7 @@ else
 
 	function p8x8_draw()
 		if not has_focus then return end
-		
+
 		-- can't set directly b/c cart might change _draw midgame
 		if p8env._draw then p8env._draw() end
 
